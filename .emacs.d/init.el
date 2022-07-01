@@ -12,6 +12,14 @@
   (require 'use-package))
 (setq use-package-always-ensure t)
 
+;; Offload the custom-set-variables to a separate file
+;; This keeps your init.el neater and you have the option
+;; to gitignore your custom.el if you see fit.
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
+(load custom-file nil t) ; Load custom file. Don't hide errors. Hide success message
+
 ;;; Appearance
 (set-frame-font "Noto Sans Mono 9" nil t)
 (global-hl-line-mode 1)
@@ -23,7 +31,6 @@
       (load-theme 'gruvbox-dark-hard t)))
 
 ;;; Layout
-(fringe-mode 0)                         ; Disable horizontal margin
 (setq column-number-mode t
       ring-bell-function 'ignore        ; Disable bell sound
       linum-format "%3d ")    ; Line number format
@@ -38,7 +45,8 @@
 
 ;;; Functionality
 (setq disabled-command-function nil ; Re-enable all disabled commands
-	shift-select-mode nil)
+	    shift-select-mode nil
+      delete-by-moving-to-trash t)
 (xterm-mouse-mode 1)              ; Enable mouse in terminal interface
 (savehist-mode)                   ; Save mini-buffer history
 (delete-selection-mode 1) ; Selected text will be overwritten when you start typing
@@ -59,8 +67,6 @@
 (defun casey/find-corresponding-file ()
   "Find the file that corresponds to this one."
   (interactive)
-  (if (not buffer-file-name)
-      (error "This buffer is not visiting a file"))
   (setq filename nil
         basename (file-name-sans-extension buffer-file-name))
   (if (string-match "\\.c" buffer-file-name)
@@ -79,7 +85,7 @@
 
 (defun reload-config ()
   (interactive)
-  (load-file (concat user-emacs-directory "init.el")))
+  (load-file (expand-file-name "init.el" user-emacs-directory)))
 
 ;;;; Spell checker
 (defun flyspell-brasileiro ()
@@ -134,14 +140,6 @@
  backup-directory-alist `((".*" . ,emacs-tmp-dir)))
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
-;; Offload the custom-set-variables to a separate file
-;; This keeps your init.el neater and you have the option
-;; to gitignore your custom.el if you see fit.
-(setq custom-file "~/.emacs.d/custom.el")
-(unless (file-exists-p custom-file)
-  (write-region "" nil custom-file))
-(load custom-file nil t) ; Load custom file. Don't hide errors. Hide success message
-
 ;;; Keybindings
 (global-set-key (kbd "<f5>") 'compile)
 (global-set-key (kbd "<f6>") 'gdb)
@@ -157,17 +155,27 @@
 (global-set-key (kbd "C-x w f") 'fill-region)
 (global-set-key (kbd "C-x w j") 'join-line)
 (global-set-key (kbd "C-x w s") 'sort-lines)
-(global-set-key (kbd "M--") 'delete-other-windows)
-(global-set-key (kbd "M-0") 'delete-window)
-(global-set-key (kbd "M-1") 'find-file)
-(global-set-key (kbd "M-2") 'split-window-below)
-(global-set-key (kbd "M-3") 'split-window-right)
-(global-set-key (kbd "M-4") 'find-file-other-window)
 (global-set-key (kbd "M-[") 'dabbrev-expand)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
 (windmove-default-keybindings)
+
+;; (use-package helm
+;;   :config
+;;   (require 'helm-config)
+;;   :init
+;;   (helm-mode 1)
+;;   :bind
+;;   (("M-x"     . helm-M-x) ;; Evaluate functions
+;;    ("C-x C-f" . helm-find-files) ;; Open or create files
+;;    ("C-x b"   . helm-mini) ;; Select buffers
+;;    ("C-x C-r" . helm-recentf) ;; Select recently saved files
+;;    ("C-c i"   . helm-imenu) ;; Select document heading
+;;    ("M-y"     . helm-show-kill-ring) ;; Show the kill ring
+;;    :map helm-map
+;;    ("C-z" . helm-select-action)
+;;    ("<tab>" . helm-execute-persistent-action)))
 
 ;;; Programming Languages Support
 ;;;; PHP

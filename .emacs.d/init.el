@@ -25,10 +25,14 @@
 (global-hl-line-mode 1)
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b")) ; Make window title the buffer name
-(use-package gruvbox-theme
+;; (use-package gruvbox-theme
+;;   :config
+;;   (if (not custom-enabled-themes)
+;;       (load-theme 'gruvbox-dark-hard t)))
+(use-package dracula-theme
   :config
   (if (not custom-enabled-themes)
-      (load-theme 'gruvbox-dark-hard t)))
+      (load-theme 'dracula t)))
 
 ;;; Layout
 (setq column-number-mode t
@@ -53,6 +57,8 @@
 (global-auto-revert-mode t) ; Auto-update buffer if file has changed on disk
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
+(winner-mode 1)                        ; Enable undo/redo window layout
+(desktop-save-mode 1)
 ;; (add-hook 'prog-mode-hook                 ; Show line numbers in programming modes
 ;;           (if (and (fboundp 'display-line-numbers-mode) (display-graphic-p))
 ;;               #'display-line-numbers-mode
@@ -64,7 +70,7 @@
   (backward-word)
   (delete-region (point) (mark)))
 
-(defun casey/find-corresponding-file ()
+(defun find-corresponding-file ()
   "Find the file that corresponds to this one."
   (interactive)
   (setq filename nil
@@ -82,6 +88,22 @@
       (setq filename (concat basename ".h")))
   (if filename (find-file filename)
     (error "Unable to find a corresponding file")))
+
+(setq makefile-names '("Makefile" "makefile"))
+(defun get-nearest-makefile ()
+  "Search for the Makefile traversing up the directory tree."
+  (let ((dir default-directory)
+	      (parent-dir (file-name-directory (directory-file-name default-directory)))
+	      (nearest-makefile 'nil))
+    (while (and (not (string= dir parent-dir))
+		            (not nearest-makefile))
+      (dolist (filename makefile-names)
+	      (setq file-path (concat dir filename))
+	      (when (file-readable-p file-path)
+	        (setq nearest-makefile file-path)))
+      (setq dir parent-dir
+	          parent-dir (file-name-directory (directory-file-name parent-dir))))
+    nearest-makefile))
 
 (defun reload-config ()
   (interactive)
@@ -141,25 +163,40 @@
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
 ;;; Keybindings
-(global-set-key (kbd "<f5>") 'compile)
-(global-set-key (kbd "<f6>") 'gdb)
-(global-set-key (kbd "<f7>") 'calc-dispatch)
+(global-set-key (kbd "<f12>") 'reload-config)
+(global-set-key (kbd "<f1>") 'save-buffer)
+(global-set-key (kbd "<f5>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" run" (get-nearest-makefile)) t)))
+(global-set-key (kbd "<f6>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" clean all" (get-nearest-makefile)))))
+(global-set-key (kbd "<f7>") 'gdb)
 (global-set-key (kbd "C-,") 'ffap)
+(global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop) ; Indent selection by one tab length
-(global-set-key (kbd "C-C A") '(lambda () (interactive) (find-file-other-window buffer-file-name) (casey/find-corresponding-file) (other-window -1)))
-(global-set-key (kbd "C-C a") 'casey/find-corresponding-file)
-(global-set-key (kbd "C-\\") 'save-buffer)
+(global-set-key (kbd "C-C A") '(lambda () (interactive) (find-file-other-window buffer-file-name) (find-corresponding-file) (other-window -1)))
+(global-set-key (kbd "C-C a") 'find-corresponding-file)
+(global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (global-set-key (kbd "C-x M-o") 'window-swap-states)
 (global-set-key (kbd "C-x w f") 'fill-region)
 (global-set-key (kbd "C-x w j") 'join-line)
 (global-set-key (kbd "C-x w s") 'sort-lines)
+(global-set-key (kbd "M--") 'kill-buffer-and-window)
+(global-set-key (kbd "M-0") 'delete-window)
+(global-set-key (kbd "M-1") 'delete-other-windows)
+(global-set-key (kbd "M-2") 'split-window-below)
+(global-set-key (kbd "M-3") 'split-window-right)
+(global-set-key (kbd "M-4") (lookup-key global-map (kbd "C-x 4")))
+(global-set-key (kbd "M-5") (lookup-key global-map (kbd "C-x 5")))
+(global-set-key (kbd "M-6") (lookup-key global-map (kbd "C-x 6")))
+(global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
+(global-set-key (kbd "M-<left>") 'previous-buffer)
+(global-set-key (kbd "M-<right>") 'next-buffer)
+(global-set-key (kbd "M-]") 'kill-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
+(global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
-(unless window-system
-  (global-set-key (kbd "M-[") 'dabbrev-expand))
+(when window-system (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
 
 ;; (use-package helm
@@ -181,3 +218,5 @@
 ;;; Programming Languages Support
 ;;;; PHP
 (use-package php-mode :ensure t)
+
+;;; Learning Emacs Lisp =======================================================

@@ -155,10 +155,11 @@
 (global-set-key (kbd "C-x w f") 'fill-region)
 (global-set-key (kbd "C-x w j") 'join-line)
 (global-set-key (kbd "C-x w s") 'sort-lines)
-(global-set-key (kbd "M-[") 'dabbrev-expand)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
+(unless window-system
+  (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
 
 ;; (use-package helm

@@ -39,3 +39,4 @@ alias vA='v ~/.bash_aliases && . ~/.bash_aliases; true'
 _ls() { local IFS=' '; command ls $LS_OPTIONS ${1+"$@"} ; }
 datefmt() { date +%y-%m-%d-%H-%M-%S ; }
 o() { (xdg-open "$@" &) }
+stash() { git commit -a --allow-empty-message -m ''; }

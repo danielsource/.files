@@ -50,19 +50,18 @@
 ;;; Functionality
 (setq disabled-command-function nil ; Re-enable all disabled commands
 	    shift-select-mode nil
-      delete-by-moving-to-trash t)
+      delete-by-moving-to-trash t
+      history-length 1000
+      global-auto-revert-non-file-buffers t)
 (xterm-mouse-mode 1)              ; Enable mouse in terminal interface
-(savehist-mode)                   ; Save mini-buffer history
+(savehist-mode 1)                   ; Save mini-buffer history
+(save-place-mode 1)
 (delete-selection-mode 1) ; Selected text will be overwritten when you start typing
 (global-auto-revert-mode t) ; Auto-update buffer if file has changed on disk
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
 (winner-mode 1)                        ; Enable undo/redo window layout
-(desktop-save-mode 1)
-;; (add-hook 'prog-mode-hook                 ; Show line numbers in programming modes
-;;           (if (and (fboundp 'display-line-numbers-mode) (display-graphic-p))
-;;               #'display-line-numbers-mode
-;;             #'linum-mode))
+;; (desktop-save-mode 1)
 
 (defun sanemacs/backward-kill-word ()
   (interactive "*")
@@ -78,14 +77,7 @@
   (if (string-match "\\.c" buffer-file-name)
       (setq filename (concat basename ".h")))
   (if (string-match "\\.h" buffer-file-name)
-      (if (file-exists-p (concat basename ".c")) (setq filename (concat basename ".c"))
-	      (setq filename (concat basename ".cpp"))))
-  (if (string-match "\\.hin" buffer-file-name)
-      (setq filename (concat basename ".cin")))
-  (if (string-match "\\.cin" buffer-file-name)
-      (setq filename (concat basename ".hin")))
-  (if (string-match "\\.cpp" buffer-file-name)
-      (setq filename (concat basename ".h")))
+	    (setq filename (concat basename ".c")))
   (if filename (find-file filename)
     (error "Unable to find a corresponding file")))
 
@@ -146,6 +138,10 @@
               indent-tabs-mode nil         ; No tab indentation
               tab-always-indent 'complete) ; Tab indent first then complete
 
+;;;; Auto complete while typing
+;; (use-package auto-complete
+;;   :config (ac-config-default))
+
 ;;;; Code style
 (setq-default c-default-style "k&r")
 
@@ -195,6 +191,7 @@
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
+(global-set-key (kbd "M-º") 'global-display-line-numbers-mode)
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
 (when window-system (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
@@ -218,5 +215,8 @@
 ;;; Programming Languages Support
 ;;;; PHP
 (use-package php-mode :ensure t)
+;;;; C
+(org-babel-do-load-languages            ; Evaluate C in Org Mode
+ 'org-babel-load-languages '((C . t)))
 
 ;;; Learning Emacs Lisp =======================================================

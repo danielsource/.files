@@ -1,7 +1,12 @@
+;;; Performance tweak
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024)) ; 1mb
+
 (add-to-list 'default-frame-alist
              '(background-color . "#1d2021"))
-(unless window-system
+
+(when (featurep 'gtk)
   (menu-bar-mode -1)
   (tool-bar-mode -1)
-  (scroll-bar-mode -1)
+  (scroll-bar-mode 1)
   (fringe-mode 0))

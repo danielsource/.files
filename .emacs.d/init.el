@@ -52,7 +52,8 @@
 	    shift-select-mode nil
       delete-by-moving-to-trash t
       history-length 1000
-      global-auto-revert-non-file-buffers t)
+      global-auto-revert-non-file-buffers t
+      visible-bell t)
 (xterm-mouse-mode 1)              ; Enable mouse in terminal interface
 (savehist-mode 1)                   ; Save mini-buffer history
 (save-place-mode 1)
@@ -78,6 +79,10 @@
       (setq filename (concat basename ".h")))
   (if (string-match "\\.h" buffer-file-name)
 	    (setq filename (concat basename ".c")))
+  (if (string-match "\\.cpp" buffer-file-name)
+      (setq filename (concat basename ".hpp")))
+  (if (string-match "\\.hpp" buffer-file-name)
+	    (setq filename (concat basename ".cpp")))
   (if filename (find-file filename)
     (error "Unable to find a corresponding file")))
 
@@ -136,7 +141,8 @@
 (setq-default tab-width 2
               c-basic-offset 2
               indent-tabs-mode nil         ; No tab indentation
-              tab-always-indent 'complete) ; Tab indent first then complete
+              tab-always-indent 'complete  ; Tab indent first then complete
+              c-tab-always-indent 'complete)
 
 ;;;; Auto complete while typing
 ;; (use-package auto-complete
@@ -187,7 +193,7 @@
 (global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
-(global-set-key (kbd "M-]") 'kill-buffer)
+(global-set-key (kbd "M-]") 'kill-this-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))

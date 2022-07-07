@@ -22,7 +22,7 @@
 
 ;;; Appearance
 (set-frame-font "Noto Sans Mono 9" nil t)
-(global-hl-line-mode 1)
+(add-hook 'prog-mode-hook 'hl-line-mode)
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b")) ; Make window title the buffer name
 ;; (use-package gruvbox-theme
@@ -62,15 +62,9 @@
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
 (winner-mode 1)                        ; Enable undo/redo window layout
-;; (desktop-save-mode 1)
+(desktop-save-mode 1)
 
-(defun sanemacs/backward-kill-word ()
-  (interactive "*")
-  (push-mark)
-  (backward-word)
-  (delete-region (point) (mark)))
-
-(defun find-corresponding-file ()
+(defun d/find-corresponding-file ()
   "Find the file that corresponds to this one."
   (interactive)
   (setq filename nil
@@ -86,15 +80,21 @@
   (if filename (find-file filename)
     (error "Unable to find a corresponding file")))
 
-(setq makefile-names '("Makefile" "makefile"))
-(defun get-nearest-makefile ()
+(defun d/find-corresponding-file-other-window ()
+  (interactive)
+  (find-file-other-window buffer-file-name)
+  (d/find-corresponding-file)
+  (other-window -1))
+
+(setq d/makefile-names '("Makefile" "makefile"))
+(defun d/get-nearest-makefile ()
   "Search for the Makefile traversing up the directory tree."
   (let ((dir default-directory)
 	      (parent-dir (file-name-directory (directory-file-name default-directory)))
 	      (nearest-makefile 'nil))
     (while (and (not (string= dir parent-dir))
 		            (not nearest-makefile))
-      (dolist (filename makefile-names)
+      (dolist (filename d/makefile-names)
 	      (setq file-path (concat dir filename))
 	      (when (file-readable-p file-path)
 	        (setq nearest-makefile file-path)))
@@ -102,19 +102,30 @@
 	          parent-dir (file-name-directory (directory-file-name parent-dir))))
     nearest-makefile))
 
-(defun reload-config ()
+(defun d/compile-make (arguments)
+  (compile (concat
+            (format "make -C \"$(dirname '%s')\" " (get-nearest-makefile)) arguments)
+           t))
+(defun d/compile-make-run () (interactive) (compile-make "run"))
+(defun d/compile-make-clean-all () (interactive) (compile-make "clean all"))
+
+(defun d/reload-config ()
   (interactive)
   (load-file (expand-file-name "init.el" user-emacs-directory)))
 
 ;;;; Spell checker
-(defun flyspell-brasileiro ()
+(defun d/flyspell-brasileiro ()
   (interactive)
   (ispell-change-dictionary "brasileiro")
   (flyspell-buffer))
-(defun flyspell-default ()
+(defun d/flyspell-default ()
   (interactive)
   (ispell-change-dictionary "default")
   (flyspell-buffer))
+
+;;;; Completion UI
+(use-package vertico
+  :init (vertico-mode 1))
 
 ;;;; Sane undo
 (use-package undo-tree     ; Enable undo-tree, sane undo/redo behavior
@@ -164,40 +175,35 @@
  backup-directory-alist `((".*" . ,emacs-tmp-dir)))
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
-(defun compile-make (arguments)
-  (compile (concat
-            (format "make -C \"$(dirname '%s')\" " (get-nearest-makefile)) arguments)
-           t))
-(defun compile-make-run () (interactive) (compile-make "run"))
-(defun compile-make-clean-all () (interactive) (compile-make "clean all"))
-
 ;;; Keybindings
 (add-hook 'c-initialization-hook
           '(lambda ()
-             (define-key c-mode-map (kbd "<f5>") 'compile-make-run)
-             (define-key c-mode-map (kbd "<f6>") 'compile-make-clean-all)))
+             (define-key c-mode-map (kbd "<f5>") 'd/compile-make-run)
+             (define-key c-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
 (add-hook 'makefile-mode-hook
           '(lambda ()
-             (define-key makefile-mode-map (kbd "<f5>") 'compile-make-run)
-             (define-key makefile-mode-map (kbd "<f6>") 'compile-make-clean-all)))
+             (define-key makefile-mode-map (kbd "<f5>") 'd/compile-make-run)
+             (define-key makefile-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
 (add-hook 'compilation-shell-minor-mode-hook
           '(lambda ()
-             (define-key compilation-shell-minor-mode-map (kbd "<f5>") 'compile-make-run)
-             (define-key compilation-shell-minor-mode-map (kbd "<f6>") 'compile-make-clean-all)))
+             (define-key compilation-shell-minor-mode-map (kbd "<f5>") 'd/compile-make-run)
+             (define-key compilation-shell-minor-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
 (add-hook 'web-mode-hook
           '(lambda ()
              (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))
-(global-set-key (kbd "<f12>") 'reload-config)
+
+(global-set-key (kbd "<f12>") 'd/reload-config)
 (global-set-key (kbd "<f1>") 'save-buffer)
 (global-set-key (kbd "<f9>") 'repeat)
 (global-set-key (kbd "C-,") 'ffap)
 (global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop) ; Indent selection by one tab length
-(global-set-key (kbd "C-C A") '(lambda () (interactive) (find-file-other-window buffer-file-name) (find-corresponding-file) (other-window -1)))
-(global-set-key (kbd "C-C a") 'find-corresponding-file)
+(global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
+(global-set-key (kbd "C-C a") 'd/find-corresponding-file)
 (global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
+(global-set-key (kbd "C-x M-]") 'kill-some-buffers)
 (global-set-key (kbd "C-x M-o") 'window-swap-states)
 (global-set-key (kbd "C-x w f") 'fill-region)
 (global-set-key (kbd "C-x w j") 'join-line)
@@ -228,20 +234,20 @@
   :init (which-key-mode))
 
 ;;;; Text completion
-(use-package company
-  :init (add-hook 'after-init-hook 'global-company-mode))
+;; (use-package company
+;;   :init (add-hook 'after-init-hook 'global-company-mode))
 
 ;;; Programming Languages Support
 
 ;;;; LSP
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :init
-  (add-hook 'c-mode-hook 'lsp)
-  (add-hook 'c++-mode-hook 'lsp)
-  (setq lsp-keymap-prefix "C-c l")
-  :config
-  (lsp-enable-which-key-integration t))
+;; (use-package lsp-mode
+;;   :commands (lsp lsp-deferred)
+;;   :init
+;;   (add-hook 'c-mode-hook 'lsp)
+;;   (add-hook 'c++-mode-hook 'lsp)
+;;   (setq lsp-keymap-prefix "C-c l")
+;;   :config
+;;   (lsp-enable-which-key-integration t))
 
 ;;;; PHP
 (use-package php-mode)

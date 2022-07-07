@@ -164,11 +164,26 @@
  backup-directory-alist `((".*" . ,emacs-tmp-dir)))
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
+(defun compile-make (arguments)
+  (compile (concat
+            (format "make -C \"$(dirname '%s')\" " (get-nearest-makefile)) arguments)
+           t))
+(defun compile-make-run () (interactive) (compile-make "run"))
+(defun compile-make-clean-all () (interactive) (compile-make "clean all"))
+
 ;;; Keybindings
 (add-hook 'c-initialization-hook
           '(lambda ()
-             (define-key c-mode-map (kbd "<f5>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" run" (get-nearest-makefile)) t)))
-             (define-key c-mode-map (kbd "<f6>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" clean all" (get-nearest-makefile)))))))
+             (define-key c-mode-map (kbd "<f5>") 'compile-make-run)
+             (define-key c-mode-map (kbd "<f6>") 'compile-make-clean-all)))
+(add-hook 'makefile-mode-hook
+          '(lambda ()
+             (define-key makefile-mode-map (kbd "<f5>") 'compile-make-run)
+             (define-key makefile-mode-map (kbd "<f6>") 'compile-make-clean-all)))
+(add-hook 'compilation-shell-minor-mode-hook
+          '(lambda ()
+             (define-key compilation-shell-minor-mode-map (kbd "<f5>") 'compile-make-run)
+             (define-key compilation-shell-minor-mode-map (kbd "<f6>") 'compile-make-clean-all)))
 (add-hook 'web-mode-hook
           '(lambda ()
              (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))

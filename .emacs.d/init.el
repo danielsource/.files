@@ -165,11 +165,16 @@
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
 ;;; Keybindings
+(add-hook 'c-initialization-hook
+          '(lambda ()
+             (define-key c-mode-map (kbd "<f5>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" run" (get-nearest-makefile)) t)))
+             (define-key c-mode-map (kbd "<f6>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" clean all" (get-nearest-makefile)))))))
+(add-hook 'web-mode-hook
+          '(lambda ()
+             (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))
 (global-set-key (kbd "<f12>") 'reload-config)
 (global-set-key (kbd "<f1>") 'save-buffer)
-(global-set-key (kbd "<f5>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" run" (get-nearest-makefile)) t)))
-(global-set-key (kbd "<f6>") '(lambda () (interactive) (compile (format "make -C \"$(dirname '%s')\" clean all" (get-nearest-makefile)))))
-(global-set-key (kbd "<f7>") 'gdb)
+(global-set-key (kbd "<f9>") 'repeat)
 (global-set-key (kbd "C-,") 'ffap)
 (global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
@@ -191,6 +196,7 @@
 (global-set-key (kbd "M-5") (lookup-key global-map (kbd "C-x 5")))
 (global-set-key (kbd "M-6") (lookup-key global-map (kbd "C-x 6")))
 (global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
+(global-set-key (kbd "M-<f9>") 'repeat-complex-command)
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
@@ -202,27 +208,47 @@
 (when window-system (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
 
-;; (use-package helm
-;;   :config
-;;   (require 'helm-config)
-;;   :init
-;;   (helm-mode 1)
-;;   :bind
-;;   (("M-x"     . helm-M-x) ;; Evaluate functions
-;;    ("C-x C-f" . helm-find-files) ;; Open or create files
-;;    ("C-x b"   . helm-mini) ;; Select buffers
-;;    ("C-x C-r" . helm-recentf) ;; Select recently saved files
-;;    ("C-c i"   . helm-imenu) ;; Select document heading
-;;    ("M-y"     . helm-show-kill-ring) ;; Show the kill ring
-;;    :map helm-map
-;;    ("C-z" . helm-select-action)
-;;    ("<tab>" . helm-execute-persistent-action)))
+;;;; Show keyboard key sequences
+(use-package which-key
+  :init (which-key-mode))
+
+;;;; Text completion
+(use-package company
+  :init (add-hook 'after-init-hook 'global-company-mode))
 
 ;;; Programming Languages Support
+
+;;;; LSP
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (add-hook 'c-mode-hook 'lsp)
+  (add-hook 'c++-mode-hook 'lsp)
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t))
+
 ;;;; PHP
-(use-package php-mode :ensure t)
+(use-package php-mode)
+
 ;;;; C
 (org-babel-do-load-languages            ; Evaluate C in Org Mode
  'org-babel-load-languages '((C . t)))
+
+;;;; HTML, CSS, JS
+(use-package web-mode
+  :custom
+  (web-mode-markup-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2)
+  :config
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
 
 ;;; Learning Emacs Lisp =======================================================

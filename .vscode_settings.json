@@ -7,6 +7,7 @@
     "editor.mouseWheelZoom": true,
     "editor.tabSize": 2,
     "extensions.autoUpdate": false,
+    "files.autoSave": "onWindowChange",
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
     "git.decorations.enabled": false,
@@ -16,6 +17,5 @@
     "terminal.integrated.gpuAcceleration": "canvas",
     "typescript.format.semicolons": "insert",
     "window.menuBarVisibility": "toggle",
-    "workbench.activityBar.visible": false,
-    "files.autoSave": "onWindowChange",
+    "workbench.activityBar.visible": false
 }

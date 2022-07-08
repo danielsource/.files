@@ -54,7 +54,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 
 # git-prompt.sh setup
 unset gitfmt
-for f in /etc/bash_completion.d/git-prompt \
+for f in /etc/bash_completion.d/git-prompt.sh \
              "${PREFIX:-/usr}/share/git-core/contrib/completion/git-prompt.sh"
 do
     if [ -f "$f" ]; then

@@ -22,7 +22,7 @@ export \
 export \
     ANDROID_HOME="$XDG_DATA_HOME/android-home/sdk" \
     CARGO_HOME="$XDG_DATA_HOME/cargo" \
-    EDITOR="${PREFIX:-/usr}/bin/emacs" \
+    EDITOR="emacs" \
     FZF_DEFAULT_COMMAND='find .' \
     FZF_DEFAULT_OPTS='--layout=reverse --no-color' \
     GOPATH="$XDG_DATA_HOME/go" \
@@ -30,7 +30,7 @@ export \
     LESSHISTFILE=- \
     MOZ_USE_XINPUT2=1 \
     NPM_PACKAGES="$XDG_DATA_HOME/npm" \
-    SUDO_EDITOR="${PREFIX:-/usr}/bin/nano"
+    SUDO_EDITOR="vim"
 
 append_path "$ANDROID_HOME/emulator"
 append_path "$ANDROID_HOME/platform-tools"

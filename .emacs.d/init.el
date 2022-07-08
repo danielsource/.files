@@ -62,7 +62,6 @@
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
 (winner-mode 1)                        ; Enable undo/redo window layout
-(desktop-save-mode 1)
 
 (defun d/find-corresponding-file ()
   "Find the file that corresponds to this one."
@@ -201,6 +200,11 @@
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop) ; Indent selection by one tab length
 (global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
+(global-set-key (kbd "C-M-]") 'erase-buffer)
+(global-set-key (kbd "C-S-c") 'clipboard-kill-ring-save)
+(global-set-key (kbd "C-S-p") 'execute-extended-command)
+(global-set-key (kbd "C-S-v") 'clipboard-yank)
+(global-set-key (kbd "C-S-x") 'clipboard-kill-region)
 (global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (global-set-key (kbd "C-x M-]") 'kill-some-buffers)
@@ -221,9 +225,9 @@
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
-(global-set-key (kbd "C-M-]") 'erase-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
+(global-set-key (kbd "M-s M-s") 'shell)
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
 (global-set-key (kbd "M-º") 'global-display-line-numbers-mode)
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
@@ -250,14 +254,8 @@
 ;;   :config
 ;;   (lsp-enable-which-key-integration t))
 
-;;;; PHP
+(use-package nasm-mode)
 (use-package php-mode)
-
-;;;; C
-(org-babel-do-load-languages            ; Evaluate C in Org Mode
- 'org-babel-load-languages '((C . t)))
-
-;;;; HTML, CSS, JS
 (use-package web-mode
   :custom
   (web-mode-markup-indent-offset 2)
@@ -272,5 +270,7 @@
   (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
+(org-babel-do-load-languages            ; Evaluate C in Org Mode
+ 'org-babel-load-languages '((C . t)))
 
 ;;; Learning Emacs Lisp =======================================================

@@ -104,10 +104,10 @@
 
 (defun d/compile-make (arguments)
   (compile (concat
-            (format "make -C \"$(dirname '%s')\" " (get-nearest-makefile)) arguments)
+            (format "make -C \"$(dirname '%s')\" " (d/get-nearest-makefile)) arguments)
            t))
-(defun d/compile-make-run () (interactive) (compile-make "run"))
-(defun d/compile-make-clean-all () (interactive) (compile-make "clean all"))
+(defun d/compile-make-run () (interactive) (d/compile-make "run"))
+(defun d/compile-make-clean-all () (interactive) (d/compile-make "clean all"))
 
 (defun d/reload-config ()
   (interactive)
@@ -221,6 +221,7 @@
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
+(global-set-key (kbd "C-M-]") 'erase-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))

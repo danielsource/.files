@@ -54,7 +54,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 
 # git-prompt.sh setup
 unset gitfmt
-for f in /etc/bash_completion.d/git-prompt.sh \
+for f in "${PREFIX:-/}/etc/bash_completion.d/git-prompt.sh" \
              "${PREFIX:-/usr}/share/git-core/contrib/completion/git-prompt.sh"
 do
     if [ -f "$f" ]; then
@@ -108,8 +108,8 @@ fi
 if ! shopt -oq posix; then
     if [ -f "${PREFIX:-/usr}/share/bash-completion/bash_completion" ]; then
         source "${PREFIX:-/usr}/share/bash-completion/bash_completion"
-    elif [ -f /etc/bash_completion ]; then
-        source /etc/bash_completion
+    elif [ -f "${PREFIX:-/}/etc/bash_completion" ]; then
+        source "${PREFIX:-/}/etc/bash_completion"
     fi
 fi
 

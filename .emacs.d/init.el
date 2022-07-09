@@ -37,7 +37,8 @@
 ;;; Layout
 (setq column-number-mode t
       ring-bell-function 'ignore        ; Disable bell sound
-      linum-format "%3d ")    ; Line number format
+      linum-format "%3d "               ; Line number format
+      frame-resize-pixelwise t)         ; Make frame use all available space on screen
 (tab-bar-mode 1)
 (fset 'yes-or-no-p 'y-or-n-p) ; y-or-n-p makes answering questions faster
 (show-paren-mode 1)           ; Show closing parens by default

@@ -245,6 +245,9 @@
 
 ;;; Programming Languages Support
 
+;;;; GDB (debugger)
+(setq gdb-many-windows t)
+
 ;;;; LSP
 ;; (use-package lsp-mode
 ;;   :commands (lsp lsp-deferred)

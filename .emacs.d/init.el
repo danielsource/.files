@@ -22,6 +22,7 @@
 
 ;;; Appearance
 (set-frame-font "Noto Sans Mono 9" nil t)
+(set-face-font 'fixed-pitch-serif "Courier New Bold")
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b")) ; Make window title the buffer name
@@ -49,12 +50,13 @@
 (setenv "BASH_ENV" "~/.bash_aliases")   ; Get access to bash aliases
 
 ;;; Functionality
-(setq disabled-command-function nil ; Re-enable all disabled commands
+(setq disabled-command-function nil  ; Re-enable all disabled commands
 	    shift-select-mode nil
       delete-by-moving-to-trash t
       history-length 1000
       global-auto-revert-non-file-buffers t
-      visible-bell t)
+      visible-bell t
+      mark-ring-max 32)
 (xterm-mouse-mode 1)              ; Enable mouse in terminal interface
 (savehist-mode 1)                   ; Save mini-buffer history
 (save-place-mode 1)
@@ -202,6 +204,7 @@
 (global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
 (global-set-key (kbd "C-M-]") 'erase-buffer)
+(global-set-key (kbd "C-S-SPC") 'rectangle-mark-mode)
 (global-set-key (kbd "C-S-c") 'clipboard-kill-ring-save)
 (global-set-key (kbd "C-S-p") 'execute-extended-command)
 (global-set-key (kbd "C-S-v") 'clipboard-yank)

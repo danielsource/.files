@@ -21,19 +21,20 @@
 (load custom-file nil t) ; Load custom file. Don't hide errors. Hide success message
 
 ;;; Appearance
-(set-frame-font "Noto Sans Mono 9" nil t)
-(set-face-font 'fixed-pitch-serif "Courier New Bold")
-(add-hook 'prog-mode-hook 'hl-line-mode)
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b")) ; Make window title the buffer name
 ;; (use-package gruvbox-theme
 ;;   :config
 ;;   (if (not custom-enabled-themes)
 ;;       (load-theme 'gruvbox-dark-hard t)))
-(use-package dracula-theme
-  :config
-  (if (not custom-enabled-themes)
-      (load-theme 'dracula t)))
+(when (display-graphic-p)
+  (set-frame-font "Noto Sans Mono 9" nil t)
+  (set-face-font 'fixed-pitch-serif "Courier New Bold")
+  (add-hook 'prog-mode-hook 'hl-line-mode)
+  (use-package dracula-theme
+    :config
+    (if (not custom-enabled-themes)
+        (load-theme 'dracula t))))
 
 ;;; Layout
 (setq column-number-mode t
@@ -235,7 +236,7 @@
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
 (global-set-key (kbd "M-º") 'global-display-line-numbers-mode)
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
-(when window-system (global-set-key (kbd "M-[") 'dabbrev-expand))
+(when (display-graphic-p) (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
 
 ;;;; Show keyboard key sequences

@@ -43,8 +43,8 @@
 (tab-bar-mode 1)
 (fset 'yes-or-no-p 'y-or-n-p) ; y-or-n-p makes answering questions faster
 (show-paren-mode 1)           ; Show closing parens by default
-;; (setq inhibit-startup-screen t)           ; Disable startup screen
-;; (setq initial-scratch-message "")         ; Make *scratch* buffer blank
+(setq inhibit-startup-screen t)         ; Disable startup screen
+(setq initial-scratch-message "")       ; Make *scratch* buffer blank
 
 ;;; External
 (setenv "BASH_ENV" "~/.bash_aliases")   ; Get access to bash aliases

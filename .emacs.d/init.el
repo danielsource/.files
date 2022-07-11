@@ -1,3 +1,5 @@
+;; TODO: reduce useless global variables
+
 ;;; Setup package.el
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -52,7 +54,7 @@
 
 ;;; Functionality
 (setq disabled-command-function nil  ; Re-enable all disabled commands
-	    shift-select-mode nil
+      shift-select-mode nil
       delete-by-moving-to-trash t
       history-length 1000
       global-auto-revert-non-file-buffers t
@@ -65,6 +67,8 @@
 (global-auto-revert-mode t) ; Auto-update buffer if file has changed on disk
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
+(add-hook 'dired-before-readin-hook
+          'dired-hide-details-mode)
 (winner-mode 1)                        ; Enable undo/redo window layout
 
 (defun d/find-corresponding-file ()
@@ -75,11 +79,11 @@
   (if (string-match "\\.c" buffer-file-name)
       (setq filename (concat basename ".h")))
   (if (string-match "\\.h" buffer-file-name)
-	    (setq filename (concat basename ".c")))
+      (setq filename (concat basename ".c")))
   (if (string-match "\\.cpp" buffer-file-name)
       (setq filename (concat basename ".hpp")))
   (if (string-match "\\.hpp" buffer-file-name)
-	    (setq filename (concat basename ".cpp")))
+      (setq filename (concat basename ".cpp")))
   (if filename (find-file filename)
     (error "Unable to find a corresponding file")))
 
@@ -93,16 +97,16 @@
 (defun d/get-nearest-makefile ()
   "Search for the Makefile traversing up the directory tree."
   (let ((dir default-directory)
-	      (parent-dir (file-name-directory (directory-file-name default-directory)))
-	      (nearest-makefile 'nil))
+        (parent-dir (file-name-directory (directory-file-name default-directory)))
+        (nearest-makefile 'nil))
     (while (and (not (string= dir parent-dir))
-		            (not nearest-makefile))
+                (not nearest-makefile))
       (dolist (filename d/makefile-names)
-	      (setq file-path (concat dir filename))
-	      (when (file-readable-p file-path)
-	        (setq nearest-makefile file-path)))
+        (setq file-path (concat dir filename))
+        (when (file-readable-p file-path)
+          (setq nearest-makefile file-path)))
       (setq dir parent-dir
-	          parent-dir (file-name-directory (directory-file-name parent-dir))))
+            parent-dir (file-name-directory (directory-file-name parent-dir))))
     nearest-makefile))
 
 (defun d/compile-make (arguments)
@@ -128,14 +132,18 @@
 
 ;;;; Completion UI
 (use-package vertico
-  :init (vertico-mode 1))
+  :init (vertico-mode 1)
+  :custom (vertico-cycle t))
 
 ;;;; Sane undo
 (use-package undo-tree     ; Enable undo-tree, sane undo/redo behavior
-  :init (global-undo-tree-mode)
-  :config (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history")))
+  :init
+  (global-undo-tree-mode)
   (global-set-key (kbd "C-z") 'undo-tree-undo)
-  (global-set-key (kbd "C-S-z") 'undo-tree-redo))
+  (global-set-key (kbd "C-S-z") 'undo-tree-redo)
+  :config
+  (setq undo-tree-history-directory-alist
+        '(("." . "~/.emacs.d/undo-tree-history"))))
 
 ;;;; Auto parenthesis
 (electric-pair-mode 1)
@@ -166,16 +174,16 @@
 (setq-default c-default-style "k&r")
 
 ;;;; Sane auto-save and backup (put files in /tmp/ or C:/Temp/)
-(defconst emacs-tmp-dir (expand-file-name (format "emacs%d" (user-uid)) temporary-file-directory))
+(defconst d/emacs-tmp-dir (expand-file-name (format "emacs%d" (user-uid)) temporary-file-directory))
 (setq
  backup-by-copying t                  ; Avoid symlinks
  delete-old-versions t
  kept-new-versions 6
  kept-old-versions 2
  version-control t
- auto-save-list-file-prefix emacs-tmp-dir
- auto-save-file-name-transforms `((".*" ,emacs-tmp-dir t)) ; Change autosave dir to tmp
- backup-directory-alist `((".*" . ,emacs-tmp-dir)))
+ auto-save-list-file-prefix d/emacs-tmp-dir
+ auto-save-file-name-transforms `((".*" ,d/emacs-tmp-dir t)) ; Change autosave dir to tmp
+ backup-directory-alist `((".*" . ,d/emacs-tmp-dir)))
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
 ;;; Keybindings

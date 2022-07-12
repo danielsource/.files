@@ -1,5 +1,3 @@
-;; TODO: reduce useless global variables
-
 ;;; Setup package.el
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -25,18 +23,16 @@
 ;;; Appearance
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b")) ; Make window title the buffer name
-;; (use-package gruvbox-theme
-;;   :config
-;;   (if (not custom-enabled-themes)
-;;       (load-theme 'gruvbox-dark-hard t)))
-(when (display-graphic-p)
-  (set-frame-font "Noto Sans Mono 9" nil t)
-  (set-face-font 'fixed-pitch-serif "Courier New Bold")
-  (add-hook 'prog-mode-hook 'hl-line-mode)
-  (use-package dracula-theme
-    :config
-    (if (not custom-enabled-themes)
-        (load-theme 'dracula t))))
+(set-frame-font "Noto Sans Mono 9" nil t)
+(set-face-font 'fixed-pitch-serif "Courier New Bold")
+(add-hook 'prog-mode-hook 'hl-line-mode)
+(use-package dracula-theme
+  :config
+  (if (not custom-enabled-themes)
+      (load-theme 'dracula t)))
+(unless (display-graphic-p)
+  (add-to-list 'default-frame-alist
+               '(background-color . nil)))
 
 ;;; Layout
 (setq column-number-mode t
@@ -74,8 +70,8 @@
 (defun d/find-corresponding-file ()
   "Find the file that corresponds to this one."
   (interactive)
-  (setq filename nil
-        basename (file-name-sans-extension buffer-file-name))
+  (let ((filename nil)
+        (basename (file-name-sans-extension buffer-file-name)))
   (if (string-match "\\.c" buffer-file-name)
       (setq filename (concat basename ".h")))
   (if (string-match "\\.h" buffer-file-name)
@@ -85,7 +81,7 @@
   (if (string-match "\\.hpp" buffer-file-name)
       (setq filename (concat basename ".cpp")))
   (if filename (find-file filename)
-    (error "Unable to find a corresponding file")))
+    (error "Unable to find a corresponding file"))))
 
 (defun d/find-corresponding-file-other-window ()
   (interactive)
@@ -139,11 +135,12 @@
 (use-package undo-tree     ; Enable undo-tree, sane undo/redo behavior
   :init
   (global-undo-tree-mode)
-  (global-set-key (kbd "C-z") 'undo-tree-undo)
+  (global-set-key (kbd "C-M-z") 'revert-buffer)
   (global-set-key (kbd "C-S-z") 'undo-tree-redo)
-  :config
-  (setq undo-tree-history-directory-alist
-        '(("." . "~/.emacs.d/undo-tree-history"))))
+  (global-set-key (kbd "C-z") 'undo-tree-undo)
+  :custom
+  (undo-tree-history-directory-alist
+   '(("." . "~/.emacs.d/undo-tree-history"))))
 
 ;;;; Auto parenthesis
 (electric-pair-mode 1)
@@ -165,10 +162,6 @@
               indent-tabs-mode nil         ; No tab indentation
               tab-always-indent 'complete  ; Tab indent first then complete
               c-tab-always-indent 'complete)
-
-;;;; Auto complete while typing
-;; (use-package auto-complete
-;;   :config (ac-config-default))
 
 ;;;; Code style
 (setq-default c-default-style "k&r")
@@ -251,9 +244,21 @@
 (use-package which-key
   :init (which-key-mode))
 
-;;;; Text completion
-;; (use-package company
-;;   :init (add-hook 'after-init-hook 'global-company-mode))
+;;;; Complete text while typing
+(use-package company
+  :init (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (global-set-key (kbd "C-c /") 'company-files)
+  (when (display-graphic-p)
+    (global-set-key (kbd "M-[") 'company-complete-common))
+  :custom
+  (company-idle-delay 0))
+(use-package company-web
+  :init
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (set (make-local-variable 'company-backends) '(company-web-html))
+              (company-mode t))))
 
 ;;; Programming Languages Support
 

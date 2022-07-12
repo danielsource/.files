@@ -32,6 +32,7 @@ alias python=python3
 alias q='qalc -t -f -'
 alias rd=rmdir
 alias rm='rm -I'
+alias th='gio trash'
 alias tree='LC_COLLATE=C tree --dirsfirst'
 alias v='emacs -nw'
 alias vA='v ~/.bash_aliases && . ~/.bash_aliases; true'
@@ -40,4 +41,4 @@ _ls() { local IFS=' '; command ls $LS_OPTIONS ${1+"$@"} ; }
 datefmt() { date +%y-%m-%d-%H-%M-%S ; }
 fr() { cmd=$1 && shift || tree -L 1 ~/.var/app ; app="$(find ~/.var/app -maxdepth 1 -type d -iname "*$cmd*" -printf '%f\n' | grep -m1 .)" || return $? ; setsid flatpak run "$app" "$@" 2>/dev/null ; }
 o() { setsid xdg-open "$@" >/dev/null 2>&1 ; }
-stash() { git commit -a --allow-empty-message -m '' ; }
+stash() { git commit -a --allow-empty-message -m '' "$@" ; }

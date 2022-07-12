@@ -72,16 +72,16 @@
   (interactive)
   (let ((filename nil)
         (basename (file-name-sans-extension buffer-file-name)))
-  (if (string-match "\\.c" buffer-file-name)
-      (setq filename (concat basename ".h")))
-  (if (string-match "\\.h" buffer-file-name)
-      (setq filename (concat basename ".c")))
-  (if (string-match "\\.cpp" buffer-file-name)
-      (setq filename (concat basename ".hpp")))
-  (if (string-match "\\.hpp" buffer-file-name)
-      (setq filename (concat basename ".cpp")))
-  (if filename (find-file filename)
-    (error "Unable to find a corresponding file"))))
+    (if (string-match "\\.c" buffer-file-name)
+        (setq filename (concat basename ".h")))
+    (if (string-match "\\.h" buffer-file-name)
+        (setq filename (concat basename ".c")))
+    (if (string-match "\\.cpp" buffer-file-name)
+        (setq filename (concat basename ".hpp")))
+    (if (string-match "\\.hpp" buffer-file-name)
+        (setq filename (concat basename ".cpp")))
+    (if filename (find-file filename)
+      (error "Unable to find a corresponding file"))))
 
 (defun d/find-corresponding-file-other-window ()
   (interactive)
@@ -233,6 +233,7 @@
 (global-set-key (kbd "M-]") 'kill-this-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
+(global-set-key (kbd "M-s M-i") 'ielm)
 (global-set-key (kbd "M-s M-s") 'shell)
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
 (global-set-key (kbd "M-º") 'global-display-line-numbers-mode)
@@ -264,6 +265,9 @@
 
 ;;;; GDB (debugger)
 (setq gdb-many-windows t)
+
+;;;; Emacs C source code
+(setq find-function-C-source-directory "~/Downloads/emacs/src/")
 
 ;;;; LSP
 ;; (use-package lsp-mode

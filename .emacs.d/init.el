@@ -126,8 +126,8 @@
   (ispell-change-dictionary "default")
   (flyspell-buffer))
 
-(defun d/copy-region-or-line (beg end)
-  (interactive "r")
+(defun d/copy-region-or-line (&optional beg end)
+  (interactive (if (use-region-p) "r"))
   (if mark-active
       (clipboard-kill-ring-save beg end)
     (let ((select-enable-clipboard t))
@@ -135,15 +135,15 @@
        (line-beginning-position)
        (+ (if (eobp) 0 1) (line-end-position))))))
 
-(defun d/cut-region-or-line (beg end)
-  (interactive "r")
+(defun d/cut-region-or-line (&optional beg end)
+  (interactive (if (use-region-p) "r"))
   (if mark-active
       (clipboard-kill-region beg end)
     (let ((select-enable-clipboard t))
       (kill-whole-line))))
 
-(defun d/delete-region-or-line (beg end)
-  (interactive "r")
+(defun d/delete-region-or-line (&optional beg end)
+  (interactive (if (use-region-p) "r"))
   (if mark-active
       (delete-region beg end)
     (delete-region
@@ -157,6 +157,8 @@
 
 ;; TODO: d/build
 ;; TODO: d/debug
+;; TODO: d/smooth-scroll-right
+;; TODO: d/smooth-scroll-left
 
 ;;;; Completion UI
 (setq read-file-name-completion-ignore-case t
@@ -240,12 +242,6 @@
 (global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
 (global-set-key (kbd "C-M-]") 'erase-buffer)
-(global-set-key (kbd "C-S-SPC") 'rectangle-mark-mode)
-(global-set-key (kbd "C-S-c") 'd/copy-region-or-line)
-(global-set-key (kbd "C-S-d") 'd/delete-region-or-line)
-(global-set-key (kbd "C-S-p") 'execute-extended-command)
-(global-set-key (kbd "C-S-v") 'clipboard-yank)
-(global-set-key (kbd "C-S-x") 'd/cut-region-or-line)
 (global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (global-set-key (kbd "C-x M-]") 'kill-some-buffers)
@@ -276,8 +272,14 @@
 (windmove-default-keybindings)
 
 (when (display-graphic-p)
-  (global-set-key (kbd "M-[") 'dabbrev-expand)
-  (global-set-key (kbd "M-F") 'd/format-buffer))
+  (global-set-key (kbd "C-S-SPC") 'rectangle-mark-mode)
+  (global-set-key (kbd "C-S-c") 'd/copy-region-or-line)
+  (global-set-key (kbd "C-S-d") 'd/delete-region-or-line)
+  (global-set-key (kbd "C-S-p") 'execute-extended-command)
+  (global-set-key (kbd "C-S-v") 'clipboard-yank)
+  (global-set-key (kbd "C-S-x") 'd/cut-region-or-line)
+  (global-set-key (kbd "M-F") 'd/format-buffer)
+  (global-set-key (kbd "M-[") 'dabbrev-expand))
 
 ;;;; Show keyboard key sequences
 (use-package which-key

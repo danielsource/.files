@@ -126,7 +126,41 @@
   (ispell-change-dictionary "default")
   (flyspell-buffer))
 
+(defun d/copy-region-or-line (beg end)
+  (interactive "r")
+  (if mark-active
+      (clipboard-kill-ring-save beg end)
+    (let ((select-enable-clipboard t))
+      (kill-ring-save
+       (line-beginning-position)
+       (+ (if (eobp) 0 1) (line-end-position))))))
+
+(defun d/cut-region-or-line (beg end)
+  (interactive "r")
+  (if mark-active
+      (clipboard-kill-region beg end)
+    (let ((select-enable-clipboard t))
+      (kill-whole-line))))
+
+(defun d/delete-region-or-line (beg end)
+  (interactive "r")
+  (if mark-active
+      (delete-region beg end)
+    (delete-region
+     (line-beginning-position)
+     (+ (if (eobp) 0 1) (line-end-position)))))
+
+(defun d/format-buffer ()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
+
+;; TODO: d/build
+;; TODO: d/debug
+
 ;;;; Completion UI
+(setq read-file-name-completion-ignore-case t
+      read-buffer-completion-ignore-case t)
 (use-package vertico
   :init (vertico-mode 1)
   :custom (vertico-cycle t))
@@ -140,7 +174,7 @@
   (global-set-key (kbd "C-z") 'undo-tree-undo)
   :custom
   (undo-tree-history-directory-alist
-   '(("." . "~/.emacs.d/undo-tree-history"))))
+   (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
 
 ;;;; Auto parenthesis
 (electric-pair-mode 1)
@@ -207,10 +241,11 @@
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
 (global-set-key (kbd "C-M-]") 'erase-buffer)
 (global-set-key (kbd "C-S-SPC") 'rectangle-mark-mode)
-(global-set-key (kbd "C-S-c") 'clipboard-kill-ring-save)
+(global-set-key (kbd "C-S-c") 'd/copy-region-or-line)
+(global-set-key (kbd "C-S-d") 'd/delete-region-or-line)
 (global-set-key (kbd "C-S-p") 'execute-extended-command)
 (global-set-key (kbd "C-S-v") 'clipboard-yank)
-(global-set-key (kbd "C-S-x") 'clipboard-kill-region)
+(global-set-key (kbd "C-S-x") 'd/cut-region-or-line)
 (global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (global-set-key (kbd "C-x M-]") 'kill-some-buffers)
@@ -238,8 +273,11 @@
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
 (global-set-key (kbd "M-º") 'global-display-line-numbers-mode)
 (global-set-key [mouse-3] 'mouse-popup-menubar-stuff) ; Gives right-click a context menu
-(when (display-graphic-p) (global-set-key (kbd "M-[") 'dabbrev-expand))
 (windmove-default-keybindings)
+
+(when (display-graphic-p)
+  (global-set-key (kbd "M-[") 'dabbrev-expand)
+  (global-set-key (kbd "M-F") 'd/format-buffer))
 
 ;;;; Show keyboard key sequences
 (use-package which-key

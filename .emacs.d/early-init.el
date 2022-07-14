@@ -4,9 +4,9 @@
 
 (when (featurep 'gtk)
   (add-to-list 'default-frame-alist
-               '(background-color . "#282a36"))
+               '(background-color . "#1e1e1e"))
   (add-to-list 'default-frame-alist
-               '(foreground-color . "#ffffff"))
+               '(foreground-color . "#d4d4d4"))
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (scroll-bar-mode 0)

@@ -26,10 +26,10 @@
 (set-frame-font "Noto Sans Mono 9" nil t)
 (set-face-font 'fixed-pitch-serif "Courier New Bold")
 (add-hook 'prog-mode-hook 'hl-line-mode)
-(use-package dracula-theme
+(use-package vscode-dark-plus-theme
   :config
   (if (not custom-enabled-themes)
-      (load-theme 'dracula t)))
+      (load-theme 'vscode-dark-plus t)))
 (unless (display-graphic-p)
   (add-to-list 'default-frame-alist
                '(background-color . nil)))
@@ -127,7 +127,7 @@
   (flyspell-buffer))
 
 (defun d/copy-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) "r"))
+  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
   (if mark-active
       (clipboard-kill-ring-save beg end)
     (let ((select-enable-clipboard t))
@@ -136,14 +136,14 @@
        (+ (if (eobp) 0 1) (line-end-position))))))
 
 (defun d/cut-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) "r"))
+  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
   (if mark-active
       (clipboard-kill-region beg end)
     (let ((select-enable-clipboard t))
       (kill-whole-line))))
 
 (defun d/delete-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) "r"))
+  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
   (if mark-active
       (delete-region beg end)
     (delete-region
@@ -235,7 +235,6 @@
 (global-set-key (kbd "<f12>") 'd/reload-config)
 (global-set-key (kbd "<f1>") 'save-buffer)
 (global-set-key (kbd "<f9>") 'repeat)
-(global-set-key (kbd "C-,") 'ffap)
 (global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop) ; Indent selection by one tab length
@@ -279,7 +278,8 @@
   (global-set-key (kbd "C-S-v") 'clipboard-yank)
   (global-set-key (kbd "C-S-x") 'd/cut-region-or-line)
   (global-set-key (kbd "M-F") 'd/format-buffer)
-  (global-set-key (kbd "M-[") 'dabbrev-expand))
+  (global-set-key (kbd "M-[") 'dabbrev-expand)
+  (global-set-key (kbd "C-,") 'ffap))
 
 ;;;; Show keyboard key sequences
 (use-package which-key

@@ -155,11 +155,6 @@
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
-;; TODO: d/build
-;; TODO: d/debug
-;; TODO: d/smooth-scroll-right
-;; TODO: d/smooth-scroll-left
-
 ;;;; Completion UI
 (setq read-file-name-completion-ignore-case t
       read-buffer-completion-ignore-case t)
@@ -216,24 +211,14 @@
 (setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
 
 ;;; Keybindings
-(add-hook 'c-initialization-hook
-          '(lambda ()
-             (define-key c-mode-map (kbd "<f5>") 'd/compile-make-run)
-             (define-key c-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
-(add-hook 'makefile-mode-hook
-          '(lambda ()
-             (define-key makefile-mode-map (kbd "<f5>") 'd/compile-make-run)
-             (define-key makefile-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
-(add-hook 'compilation-shell-minor-mode-hook
-          '(lambda ()
-             (define-key compilation-shell-minor-mode-map (kbd "<f5>") 'd/compile-make-run)
-             (define-key compilation-shell-minor-mode-map (kbd "<f6>") 'd/compile-make-clean-all)))
 (add-hook 'web-mode-hook
           '(lambda ()
              (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))
 
 (global-set-key (kbd "<f12>") 'd/reload-config)
 (global-set-key (kbd "<f1>") 'save-buffer)
+(global-set-key (kbd "<f5>") 'd/compile-make-run)
+(global-set-key (kbd "<f6>") 'd/compile-make-clean-all)
 (global-set-key (kbd "<f9>") 'repeat)
 (global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
@@ -263,6 +248,7 @@
 (global-set-key (kbd "M-]") 'kill-this-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
+(global-set-key (kbd "M-s M-e") 'eshell)
 (global-set-key (kbd "M-s M-i") 'ielm)
 (global-set-key (kbd "M-s M-s") 'shell)
 (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
@@ -291,7 +277,7 @@
   :config
   (global-set-key (kbd "C-c /") 'company-files)
   (when (display-graphic-p)
-    (global-set-key (kbd "M-[") 'company-complete-common))
+    (global-set-key (kbd "M-[") 'company-complete))
   :custom
   (company-idle-delay 0))
 (use-package company-web
@@ -308,6 +294,8 @@
 
 ;;;; Emacs C source code
 (setq find-function-C-source-directory "~/Downloads/emacs/src/")
+
+(add-to-list 'auto-mode-alist '("\\.inc\\'" . c-mode))
 
 ;;;; LSP
 ;; (use-package lsp-mode
@@ -337,5 +325,3 @@
   (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
 (org-babel-do-load-languages            ; Evaluate C in Org Mode
  'org-babel-load-languages '((C . t)))
-
-;;; Learning Emacs Lisp =======================================================

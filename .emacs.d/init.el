@@ -257,15 +257,16 @@
 (windmove-default-keybindings)
 
 (when (display-graphic-p)
+  (global-set-key (kbd "C-,") 'ffap)
   (global-set-key (kbd "C-S-SPC") 'rectangle-mark-mode)
+  (global-set-key (kbd "C-S-a") 'mark-whole-buffer)
   (global-set-key (kbd "C-S-c") 'd/copy-region-or-line)
   (global-set-key (kbd "C-S-d") 'd/delete-region-or-line)
   (global-set-key (kbd "C-S-p") 'execute-extended-command)
   (global-set-key (kbd "C-S-v") 'clipboard-yank)
   (global-set-key (kbd "C-S-x") 'd/cut-region-or-line)
   (global-set-key (kbd "M-F") 'd/format-buffer)
-  (global-set-key (kbd "M-[") 'dabbrev-expand)
-  (global-set-key (kbd "C-,") 'ffap))
+  (global-set-key (kbd "M-[") 'dabbrev-expand))
 
 ;;;; Show keyboard key sequences
 (use-package which-key

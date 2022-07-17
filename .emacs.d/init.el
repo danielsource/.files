@@ -1,7 +1,8 @@
 ;;; Setup package.el
 (require 'package)
 (setq package-enable-at-startup nil)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
 (unless package--initialized (package-initialize))
 
 ;;; Setup use-package
@@ -22,8 +23,9 @@
 
 ;;; Appearance
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
-              frame-title-format '("%b")) ; Make window title the buffer name
-(set-frame-font "Noto Sans Mono 9" nil t)
+              frame-title-format '("%b %@ %F")) ; Make window title the buffer name
+(when (member "Noto Sans Mono" (font-family-list))
+  (set-frame-font "Noto Sans Mono 9" nil t))
 (set-face-font 'fixed-pitch-serif "Courier New Bold")
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (use-package vscode-dark-plus-theme
@@ -222,6 +224,7 @@
 (global-set-key (kbd "<f9>") 'repeat)
 (global-set-key (kbd "C-.") 'calc-dispatch)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop) ; De-indent selection by one tab length
+(global-set-key (kbd "C-<return>") 'pop-global-mark)
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop) ; Indent selection by one tab length
 (global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
@@ -245,6 +248,7 @@
 (global-set-key (kbd "M-<f9>") 'repeat-complex-command)
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
+(global-set-key (kbd "M-RET") 'exchange-point-and-mark)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
 (global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))

@@ -2,7 +2,9 @@
 (setq gc-cons-threshold 100000000)      ; 100 MB
 (setq read-process-output-max 1000000)  ; 1 MB
 
-(when (featurep 'gtk)
+(when (or
+       (featurep 'gtk)
+       (eq system-type 'windows-nt))
   (add-to-list 'default-frame-alist
                '(background-color . "#1e1e1e"))
   (add-to-list 'default-frame-alist

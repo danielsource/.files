@@ -24,8 +24,10 @@
 ;;; Appearance
 (setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
               frame-title-format '("%b %@ %F")) ; Make window title the buffer name
-(when (member "Noto Sans Mono" (font-family-list))
-  (set-frame-font "Noto Sans Mono 9" nil t))
+(if (eq system-type 'windows-nt)
+    (set-frame-font "Consolas 9" nil t)
+  (when (member "Inconsolata" (font-family-list))
+    (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
 (set-face-font 'fixed-pitch-serif "Courier New Bold")
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (use-package vscode-dark-plus-theme

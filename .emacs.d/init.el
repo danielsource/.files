@@ -94,7 +94,7 @@
   (other-window -1))
 
 (setq d/makefile-names '("Makefile" "makefile"))
-(defun d/get-nearest-makefile ()
+(defun d/get-nearest-makefile (&optional getdir)
   "Search for the Makefile traversing up the directory tree."
   (let ((dir default-directory)
         (parent-dir (file-name-directory (directory-file-name default-directory)))
@@ -107,11 +107,15 @@
           (setq nearest-makefile file-path)))
       (setq dir parent-dir
             parent-dir (file-name-directory (directory-file-name parent-dir))))
-    nearest-makefile))
+    (if nearest-makefile
+        (if getdir
+            (file-name-directory nearest-makefile)
+          nearest-makefile)
+      (error "Makefile not found"))))
 
 (defun d/compile-make (arguments)
   (compile (concat
-            (format "make -C \"$(dirname '%s')\" " (d/get-nearest-makefile)) arguments)
+            (format "make -C '%s' " (d/get-nearest-makefile t)) arguments)
            t))
 (defun d/compile-make-run () (interactive) (d/compile-make "run"))
 (defun d/compile-make-clean-all () (interactive) (d/compile-make "clean all"))
@@ -131,28 +135,34 @@
   (flyspell-buffer))
 
 (defun d/copy-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
   (if mark-active
       (clipboard-kill-ring-save beg end)
     (let ((select-enable-clipboard t))
       (kill-ring-save
        (line-beginning-position)
-       (+ (if (eobp) 0 1) (line-end-position))))))
+       (if (eobp) (point-at-eol) (+ 1 (line-end-position)))))))
 
 (defun d/cut-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
   (if mark-active
       (clipboard-kill-region beg end)
     (let ((select-enable-clipboard t))
       (kill-whole-line))))
 
 (defun d/delete-region-or-line (&optional beg end)
-  (interactive (if (use-region-p) (list (region-beginning) (region-end))))
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
   (if mark-active
       (delete-region beg end)
     (delete-region
      (line-beginning-position)
-     (+ (if (eobp) 0 1) (line-end-position)))))
+     (if (eobp) (point-at-eol) (+ 1 (line-end-position))))))
 
 (defun d/format-buffer ()
   (interactive)

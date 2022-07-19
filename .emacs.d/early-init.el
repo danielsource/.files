@@ -3,8 +3,9 @@
 (setq read-process-output-max 1000000)  ; 1 MB
 
 (when (or
+       (eq system-type 'windows-nt)
        (featurep 'gtk)
-       (eq system-type 'windows-nt))
+       (featurep 'x))
   (add-to-list 'default-frame-alist
                '(background-color . "#1e1e1e"))
   (add-to-list 'default-frame-alist

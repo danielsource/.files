@@ -1,0 +1,9 @@
+[user]
+	email = 79308609+danielsource@users.noreply.github.com
+	name = daniel.source
+[core]
+	pager = "less -MR "
+[alias]
+	s = status
+	l = log
+	c = commit --allow-empty-message -am ''

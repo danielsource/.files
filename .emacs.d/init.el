@@ -70,6 +70,10 @@
 (add-hook 'dired-before-readin-hook
           'dired-hide-details-mode)
 (winner-mode 1)                        ; Enable undo/redo window layout
+(add-to-list
+ 'display-buffer-alist
+ '("*Async Shell Command*"              ; Run command without displaying the output
+   display-buffer-no-window (nil)))
 
 (defun d/find-corresponding-file ()
   "Find the file that corresponds to this one."
@@ -241,6 +245,7 @@
 (global-set-key (kbd "C-C A") 'd/find-corresponding-file-other-window)
 (global-set-key (kbd "C-C a") 'd/find-corresponding-file)
 (global-set-key (kbd "C-M-]") 'erase-buffer)
+(global-set-key (kbd "C-M-g") 'term)
 (global-set-key (kbd "C-\\") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (global-set-key (kbd "C-x M-]") 'kill-some-buffers)

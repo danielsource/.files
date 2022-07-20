@@ -3,6 +3,7 @@
 	name = daniel.source
 [core]
 	pager = "less -MR "
+	excludesFile = ~/.gitexcludes
 [alias]
 	c = commit --allow-empty-message -am ''
 	d = diff

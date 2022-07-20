@@ -40,40 +40,41 @@
 
 ;;; Layout
 (setq column-number-mode t
-      ring-bell-function 'ignore        ; Disable bell sound
+      frame-resize-pixelwise t ; Make frame use all available space on screen
+      inhibit-startup-screen t ; Disable startup screen
+      initial-scratch-message ""        ; Make *scratch* buffer blank
       linum-format "%3d "               ; Line number format
-      frame-resize-pixelwise t)         ; Make frame use all available space on screen
-(tab-bar-mode 1)
+      ring-bell-function 'ignore)       ; Disable bell sound
 (fset 'yes-or-no-p 'y-or-n-p) ; y-or-n-p makes answering questions faster
-(show-paren-mode 1)           ; Show closing parens by default
-(setq inhibit-startup-screen t)         ; Disable startup screen
-(setq initial-scratch-message "")       ; Make *scratch* buffer blank
+(if (featurep 'tab-bar-mode)
+    (tab-bar-mode t))
+(show-paren-mode t)                   ; Show closing parens by default
 
 ;;; External
 (setenv "BASH_ENV" "~/.bash_aliases")   ; Get access to bash aliases
 
 ;;; Functionality
-(setq disabled-command-function nil  ; Re-enable all disabled commands
-      shift-select-mode nil
-      delete-by-moving-to-trash t
+(setq delete-by-moving-to-trash t
+      disabled-command-function nil  ; Re-enable all disabled commands
       history-length 1000
-      global-auto-revert-non-file-buffers t
+      mark-ring-max 32
+      shift-select-mode nil
       visible-bell t
-      mark-ring-max 32)
-(xterm-mouse-mode 1)              ; Enable mouse in terminal interface
-(savehist-mode 1)                   ; Save mini-buffer history
-(save-place-mode 1)
-(delete-selection-mode 1) ; Selected text will be overwritten when you start typing
-(global-auto-revert-mode t) ; Auto-update buffer if file has changed on disk
+      global-auto-revert-non-file-buffers t)
 (add-hook 'before-save-hook
           'delete-trailing-whitespace) ; Delete trailing whitespace on save
 (add-hook 'dired-before-readin-hook
           'dired-hide-details-mode)
-(winner-mode 1)                        ; Enable undo/redo window layout
 (add-to-list
  'display-buffer-alist
- '("*Async Shell Command*"              ; Run command without displaying the output
+ '("*Async Shell Command*" ; Run command without displaying the output
    display-buffer-no-window (nil)))
+(delete-selection-mode t) ; Selected text will be overwritten when you start typing
+(global-auto-revert-mode t) ; Auto-update buffer if file has changed on disk
+(save-place-mode t)
+(savehist-mode t)                 ; Save mini-buffer history
+(winner-mode t)                   ; Enable undo/redo window layout
+(xterm-mouse-mode t)              ; Enable mouse in terminal interface
 
 (defun d/find-corresponding-file ()
   "Find the file that corresponds to this one."
@@ -90,7 +91,6 @@
         (setq filename (concat basename ".cpp")))
     (if filename (find-file filename)
       (error "Unable to find a corresponding file"))))
-
 (defun d/find-corresponding-file-other-window ()
   (interactive)
   (find-file-other-window buffer-file-name)
@@ -148,7 +148,6 @@
       (kill-ring-save
        (line-beginning-position)
        (if (eobp) (point-at-eol) (+ 1 (line-end-position)))))))
-
 (defun d/cut-region-or-line (&optional beg end)
   (interactive (if (use-region-p)
                    (list (region-beginning) (region-end))
@@ -157,7 +156,6 @@
       (clipboard-kill-region beg end)
     (let ((select-enable-clipboard t))
       (kill-whole-line))))
-
 (defun d/delete-region-or-line (&optional beg end)
   (interactive (if (use-region-p)
                    (list (region-beginning) (region-end))
@@ -173,12 +171,14 @@
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
 
+(if (version<= emacs-version "27.1")
+    (load-file (expand-file-name "early-init.el" user-emacs-directory))
 ;;;; Completion UI
+  (use-package vertico
+    :init (vertico-mode t)
+    :custom (vertico-cycle t)))
 (setq read-file-name-completion-ignore-case t
       read-buffer-completion-ignore-case t)
-(use-package vertico
-  :init (vertico-mode 1)
-  :custom (vertico-cycle t))
 
 ;;;; Sane undo
 (use-package undo-tree     ; Enable undo-tree, sane undo/redo behavior
@@ -192,25 +192,25 @@
    (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
 
 ;;;; Auto parenthesis
-(electric-pair-mode 1)
+(electric-pair-mode t)
 (setq electric-pair-preserve-balance nil)
 
 ;;;; Recent files
-(recentf-mode 1)
+(recentf-mode t)
 (setq recentf-max-menu-items 32)
 
 ;;;; Scrolling
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)) ; One line at a time
+(setq mouse-wheel-follow-mouse 't       ; Scroll window under mouse
       mouse-wheel-progressive-speed nil ; Don't accelerate scrolling
-      mouse-wheel-follow-mouse 't       ; Scroll window under mouse
-      scroll-step 1)              ; Keyboard scroll one line at a time
+      scroll-step 1               ; Keyboard scroll one line at a time
+      mouse-wheel-scroll-amount '(1 ((shift) . 1))) ; One line at a time
 
 ;;;; Indentation
-(setq-default tab-width 2
-              c-basic-offset 2
-              indent-tabs-mode nil         ; No tab indentation
-              tab-always-indent 'complete  ; Tab indent first then complete
-              c-tab-always-indent 'complete)
+(setq-default c-basic-offset 2
+              c-tab-always-indent 'complete
+              indent-tabs-mode nil        ; No tab indentation
+              tab-always-indent 'complete ; Tab indent first then complete
+              tab-width 2)
 
 ;;;; Code style
 (setq-default c-default-style "k&r")
@@ -218,19 +218,18 @@
 ;;;; Sane auto-save and backup (put files in /tmp/ or C:/Temp/)
 (defconst d/emacs-tmp-dir (expand-file-name (format "emacs%d" (user-uid)) temporary-file-directory))
 (setq
- backup-by-copying t                  ; Avoid symlinks
+ auto-save-file-name-transforms `((".*" ,d/emacs-tmp-dir t)) ; Change autosave dir to tmp
+ auto-save-list-file-prefix d/emacs-tmp-dir
+ backup-by-copying t                    ; Avoid symlinks
+ backup-directory-alist `((".*" . ,d/emacs-tmp-dir))
+ create-lockfiles nil ; Lockfiles unfortunately cause more pain than benefit version-control t
  delete-old-versions t
  kept-new-versions 6
- kept-old-versions 2
- version-control t
- auto-save-list-file-prefix d/emacs-tmp-dir
- auto-save-file-name-transforms `((".*" ,d/emacs-tmp-dir t)) ; Change autosave dir to tmp
- backup-directory-alist `((".*" . ,d/emacs-tmp-dir)))
-(setq create-lockfiles nil) ; Lockfiles unfortunately cause more pain than benefit
+ kept-old-versions 2)
 
 ;;; Keybindings
 (add-hook 'web-mode-hook
-          '(lambda ()
+          (lambda ()
              (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))
 
 (global-set-key (kbd "<f12>") 'd/reload-config)
@@ -267,8 +266,8 @@
 (global-set-key (kbd "M-<right>") 'next-buffer)
 (global-set-key (kbd "M-RET") 'exchange-point-and-mark)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
-(global-set-key (kbd "M-i") '(lambda () (interactive) (other-window -1)))
-(global-set-key (kbd "M-o") '(lambda () (interactive) (other-window 1)))
+(global-set-key (kbd "M-i") (lambda () (interactive) (other-window -1)))
+(global-set-key (kbd "M-o") (lambda () (interactive) (other-window 1)))
 (global-set-key (kbd "M-s M-e") 'eshell)
 (global-set-key (kbd "M-s M-i") 'ielm)
 (global-set-key (kbd "M-s M-s") 'shell)
@@ -354,13 +353,13 @@
   (web-mode-css-indent-offset 2)
   (web-mode-code-indent-offset 2)
   :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode)))
+  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode)))
 (org-babel-do-load-languages            ; Evaluate C in Org Mode
  'org-babel-load-languages '((C . t)))

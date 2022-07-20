@@ -4,6 +4,7 @@
 [core]
 	pager = "less -MR "
 [alias]
-	s = status
-	l = log
 	c = commit --allow-empty-message -am ''
+	d = diff
+	l = log
+	s = status

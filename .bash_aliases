@@ -35,7 +35,7 @@ alias rd=rmdir
 alias rm='rm -I'
 alias th='gio trash'
 alias tree='LC_COLLATE=C tree --dirsfirst'
-alias v='emacs -nw'
+alias v='~/.emacs.d/minimal.sh -nw'
 alias vA='v ~/.bash_aliases && . ~/.bash_aliases; true'
 
 _ls() { local IFS=' '; command ls $LS_OPTIONS ${1+"$@"} ; }

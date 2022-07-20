@@ -22,30 +22,22 @@
 (load custom-file nil t) ; Load custom file. Don't hide errors. Hide success message
 
 ;;; Appearance
-(setq-default cursor-type 'bar ; Line-style cursor similar to other text editors
-              frame-title-format '("%b %@ %F")) ; Make window title the buffer name
-(if (eq system-type 'windows-nt)
-    (set-frame-font "Consolas 9" nil t)
-  (when (member "Inconsolata" (font-family-list))
-    (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
-(set-face-font 'fixed-pitch-serif "Courier New Bold")
+(minimal/font)
 (add-hook 'prog-mode-hook 'hl-line-mode)
 (use-package vscode-dark-plus-theme
-  :config
-  (if (not custom-enabled-themes)
-      (load-theme 'vscode-dark-plus t)))
+	           :config
+	           (if (not custom-enabled-themes)
+		             (load-theme 'vscode-dark-plus t)))
 (unless (display-graphic-p)
   (add-to-list 'default-frame-alist
                '(background-color . nil)))
 
 ;;; Layout
-(setq column-number-mode t
-      frame-resize-pixelwise t ; Make frame use all available space on screen
+(setq frame-resize-pixelwise t ; Make frame use all available space on screen
       inhibit-startup-screen t ; Disable startup screen
       initial-scratch-message ""        ; Make *scratch* buffer blank
       linum-format "%3d "               ; Line number format
       ring-bell-function 'ignore)       ; Disable bell sound
-(fset 'yes-or-no-p 'y-or-n-p) ; y-or-n-p makes answering questions faster
 (if (featurep 'tab-bar-mode)
     (tab-bar-mode t))
 (show-paren-mode t)                   ; Show closing parens by default
@@ -55,7 +47,6 @@
 
 ;;; Functionality
 (setq delete-by-moving-to-trash t
-      disabled-command-function nil  ; Re-enable all disabled commands
       history-length 1000
       mark-ring-max 32
       shift-select-mode nil
@@ -75,43 +66,6 @@
 (savehist-mode t)                 ; Save mini-buffer history
 (winner-mode t)                   ; Enable undo/redo window layout
 (xterm-mouse-mode t)              ; Enable mouse in terminal interface
-
-(defun d/find-corresponding-file ()
-  (interactive)
-  (let ((filename nil)
-        (basename (file-name-sans-extension buffer-file-name)))
-    (if (string-match "\\.c" buffer-file-name)
-        (setq filename (concat basename ".h")))
-    (if (string-match "\\.h" buffer-file-name)
-        (setq filename (concat basename ".c")))
-    (if (string-match "\\.cpp" buffer-file-name)
-        (setq filename (concat basename ".hpp")))
-    (if (string-match "\\.hpp" buffer-file-name)
-        (setq filename (concat basename ".cpp")))
-    (if filename (find-file filename)
-      (error "Unable to find a corresponding file"))))
-(defun d/find-corresponding-file-other-window ()
-  (interactive)
-  (find-file-other-window buffer-file-name)
-  (d/find-corresponding-file)
-  (other-window -1))
-
-(defun d/get-above-makefile (&optional getdir)
-  (let ((dir (locate-dominating-file "." "Makefile")))
-    (if dir
-        (concat dir (unless getdir "Makefile"))
-      (error "Makefile not found"))))
-
-(defun d/compile-make (arguments)
-  (compile (concat
-            (format "make -C '%s' " (d/get-above-makefile t)) arguments)
-           t))
-(defun d/compile-make-run () (interactive) (d/compile-make "run"))
-(defun d/compile-make-clean-all () (interactive) (d/compile-make "clean all"))
-
-(defun d/reload-config ()
-  (interactive)
-  (load-file (expand-file-name "init.el" user-emacs-directory)))
 
 ;;;; Spell checker
 (defun d/flyspell-brasileiro ()
@@ -151,30 +105,25 @@
      (line-beginning-position)
      (if (eobp) (point-at-eol) (+ 1 (line-end-position))))))
 
-(defun d/format-buffer ()
-  (interactive)
-  (save-excursion
-    (indent-region (point-min) (point-max) nil)))
-
 (if (version<= emacs-version "27.1")
     (load-file (expand-file-name "early-init.el" user-emacs-directory))
 ;;;; Completion UI
   (use-package vertico
-    :init (vertico-mode t)
-    :custom (vertico-cycle t)))
+	             :init (vertico-mode t)
+	             :custom (vertico-cycle t)))
 (setq read-file-name-completion-ignore-case t
       read-buffer-completion-ignore-case t)
 
 ;;;; Sane undo
 (use-package undo-tree     ; Enable undo-tree, sane undo/redo behavior
-  :init
-  (global-undo-tree-mode)
-  (global-set-key (kbd "C-M-z") 'revert-buffer)
-  (global-set-key (kbd "C-S-z") 'undo-tree-redo)
-  (global-set-key (kbd "C-z") 'undo-tree-undo)
-  :custom
-  (undo-tree-history-directory-alist
-   (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
+	           :init
+	           (global-undo-tree-mode)
+	           (global-set-key (kbd "C-M-z") 'revert-buffer)
+	           (global-set-key (kbd "C-S-z") 'undo-tree-redo)
+	           (global-set-key (kbd "C-z") 'undo-tree-undo)
+	           :custom
+	           (undo-tree-history-directory-alist
+	            (list (cons "." (expand-file-name "undo-tree-history" user-emacs-directory)))))
 
 ;;;; Auto parenthesis
 (electric-pair-mode t)
@@ -189,16 +138,6 @@
       mouse-wheel-progressive-speed nil ; Don't accelerate scrolling
       scroll-step 1               ; Keyboard scroll one line at a time
       mouse-wheel-scroll-amount '(1 ((shift) . 1))) ; One line at a time
-
-;;;; Indentation
-(setq-default c-basic-offset 2
-              c-tab-always-indent 'complete
-              indent-tabs-mode nil        ; No tab indentation
-              tab-always-indent 'complete ; Tab indent first then complete
-              tab-width 2)
-
-;;;; Code style
-(setq-default c-default-style "k&r")
 
 ;;;; Sane auto-save and backup (put files in /tmp/ or C:/Temp/)
 (defconst d/emacs-tmp-dir (expand-file-name (format "emacs%d" (user-uid)) temporary-file-directory))
@@ -217,16 +156,16 @@
           (lambda ()
             (define-key web-mode-map (kbd "<f5>") 'browse-url-of-buffer)))
 
-(global-set-key (kbd "<f12>") 'd/reload-config)
+(global-set-key (kbd "<f12>") 'minimal/reload)
 (global-set-key (kbd "<f1>") 'save-buffer)
-(global-set-key (kbd "<f5>") 'd/compile-make-run)
-(global-set-key (kbd "<f6>") 'd/compile-make-clean-all)
+(global-set-key (kbd "<f5>") 'minimal/make-run)
+(global-set-key (kbd "<f6>") 'minimal/make-clean-all)
 (global-set-key (kbd "<mode-line> C-<down-mouse-1>") 'mouse-buffer-menu)
 (global-set-key (kbd "C-,") 'ffap)
 (global-set-key (kbd "C-<") 'indent-rigidly-left-to-tab-stop)
 (global-set-key (kbd "C-<down-mouse-1>") 'ffap-at-mouse)
 (global-set-key (kbd "C->") 'indent-rigidly-right-to-tab-stop)
-(global-set-key (kbd "C-C a") 'd/find-corresponding-file)
+(global-set-key (kbd "C-C a") 'minimal/corresponding-file)
 (global-set-key (kbd "C-M-,") 'ffap-alternate-file)
 (global-set-key (kbd "C-M-]") 'erase-buffer)
 (global-set-key (kbd "C-M-g") 'term)
@@ -242,7 +181,7 @@
 (global-set-key (kbd "C-c d") 'dired-at-point)
 (global-set-key (kbd "C-c r") 'ffap-read-only)
 (global-set-key (kbd "C-x 4 C-,") 'ffap-other-window)
-(global-set-key (kbd "C-x 4 C-C a") 'd/find-corresponding-file-other-window)
+(global-set-key (kbd "C-x 4 C-C a") 'minimal/corresponding-file-other-window)
 (global-set-key (kbd "C-x 4 C-M-,") 'ffap-alternate-file-other-window)
 (global-set-key (kbd "C-x 4 C-c d") 'ffap-dired-other-window)
 (global-set-key (kbd "C-x 4 C-c r") 'ffap-read-only-other-window)
@@ -268,7 +207,6 @@
 (global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
-(global-set-key (kbd "M-F") 'd/format-buffer)
 (global-set-key (kbd "M-]") 'kill-this-buffer)
 (global-set-key (kbd "M-i") (lambda () (interactive) (other-window -1)))
 (global-set-key (kbd "M-o") (lambda () (interactive) (other-window 1)))
@@ -285,23 +223,23 @@
 
 ;;;; Show keyboard key sequences
 (use-package which-key
-  :init (which-key-mode))
+	           :init (which-key-mode))
 
 ;;;; Complete text while typing
 (use-package company
-  :init (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  (global-set-key (kbd "C-c /") 'company-files)
-  (when (display-graphic-p)
-    (global-set-key (kbd "M-[") 'company-complete))
-  :custom
-  (company-idle-delay 0))
+	           :init (add-hook 'after-init-hook 'global-company-mode)
+	           :config
+	           (global-set-key (kbd "C-c /") 'company-files)
+	           (when (display-graphic-p)
+	             (global-set-key (kbd "M-[") 'company-complete))
+	           :custom
+	           (company-idle-delay 0))
 (use-package company-web
-  :init
-  (add-hook 'web-mode-hook
-            (lambda ()
-              (set (make-local-variable 'company-backends) '(company-web-html))
-              (company-mode t))))
+	           :init
+	           (add-hook 'web-mode-hook
+		                   (lambda ()
+			                   (set (make-local-variable 'company-backends) '(company-web-html))
+			                   (company-mode t))))
 
 ;;; Programming Languages Support
 
@@ -326,18 +264,18 @@
 (use-package nasm-mode)
 (use-package php-mode)
 (use-package web-mode
-  :custom
-  (web-mode-markup-indent-offset 2)
-  (web-mode-css-indent-offset 2)
-  (web-mode-code-indent-offset 2)
-  :config
-  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode)))
+	           :custom
+	           (web-mode-markup-indent-offset 2)
+	           (web-mode-css-indent-offset 2)
+	           (web-mode-code-indent-offset 2)
+	           :config
+	           (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+	           (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode)))
 (org-babel-do-load-languages            ; Evaluate C in Org Mode
  'org-babel-load-languages '((C . t)))

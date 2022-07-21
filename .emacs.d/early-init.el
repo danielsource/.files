@@ -2,7 +2,7 @@
 (setq gc-cons-threshold 100000000)      ; 100 MB
 (setq read-process-output-max 1000000)  ; 1 MB
 
-(setq minimal/lib t)
+(defvar minimal/lib t)
 (load-file (expand-file-name "minimal.el" user-emacs-directory))
 
 ;;; Appearance and Layout

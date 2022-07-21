@@ -5,5 +5,4 @@
 (defvar minimal/lib t)
 (load-file (expand-file-name "minimal.el" user-emacs-directory))
 (minimal/sane-config)
-(minimal/bindings)
 (minimal/theme)

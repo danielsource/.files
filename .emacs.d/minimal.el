@@ -4,40 +4,44 @@
         (concat dir (unless getdir "Makefile"))
       (error "Makefile not found"))))
 
-(defun minimal/make (arguments)
+(defun minimal/make (&optional arguments)
   (compile (concat
             (format "make -C '%s' " (minimal/get-above-makefile t)) arguments)
            t))
 
-(defun minimal/sane-config ()
+(defun minimal/sane-config (&optional nomodes noindent gui)
   "It's called `sane` but still opinionated."
   (interactive)
-  (column-number-mode t)
-  (global-auto-revert-mode t)
-  (winner-mode t)
-  (xterm-mouse-mode t)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (tool-bar-mode -1)
+  (unless nomodes
+    (column-number-mode t)
+    (electric-pair-mode t)
+    (global-auto-revert-mode t)
+    (winner-mode t)
+    (xterm-mouse-mode t))
+  (unless gui
+    (menu-bar-mode -1)
+    (scroll-bar-mode -1)
+    (tool-bar-mode -1))
   (fset 'yes-or-no-p 'y-or-n-p)
-  (ffap-bindings)
-  (windmove-default-keybindings)
   (add-hook 'before-save-hook
             'delete-trailing-whitespace)
   (add-to-list 'display-buffer-alist
                '("*Async Shell Command*"
                  display-buffer-no-window (nil)))
+  (unless noindent
+    (setq-default indent-tabs-mode nil
+                  tab-width 2
+                  c-basic-offset 2
+                  tab-always-indent 'complete
+                  c-tab-always-indent 'complete
+                  c-default-style "k&r"))
   (setq-default inhibit-startup-screen t
                 initial-scratch-message ""
-                indent-tabs-mode nil
-                tab-width 2
-                c-basic-offset 2
-                tab-always-indent 'complete
-                c-tab-always-indent 'complete
-                c-default-style "k&r"
                 cursor-type 'bar
                 disabled-command-function nil
+                electric-pair-preserve-balance nil
                 scroll-step 1
+                mouse-wheel-follow-mouse t
                 mouse-wheel-progressive-speed nil
                 mouse-wheel-scroll-amount '(1 ((shift) . 1))
                 frame-resize-pixelwise t
@@ -47,6 +51,8 @@
 
 (defun minimal/bindings ()
   (interactive)
+  (ffap-bindings)
+  (windmove-default-keybindings)
   (global-set-key (kbd "<f1>") 'save-buffer)
   (global-set-key (kbd "C-x <f1>") 'save-some-buffers)
   (global-set-key (kbd "<f5>") 'minimal/make-run)
@@ -74,6 +80,8 @@
   (global-set-key (kbd "M-o") 'other-window)
   (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
   (when (display-graphic-p)
+    (global-set-key (kbd "C-z") 'undo)
+    (global-set-key (kbd "C-S-z") 'undo-redo)
     (global-set-key (kbd "M-[") 'dabbrev-expand)))
 
 (defun minimal/theme ()
@@ -119,13 +127,15 @@
     (save-excursion
       (indent-region (point-min) (point-max) nil))))
 
+(defvar minimal/after-reload-hook nil)
 (defun minimal/reload ()
   (interactive)
   (load-file (expand-file-name
               (if (boundp 'minimal/lib)
                   "init.el"
                 "minimal.el")
-              user-emacs-directory)))
+              user-emacs-directory))
+  (run-hooks 'minimal/after-reload-hook))
 
 (defun minimal/font ()
   (interactive)

@@ -22,6 +22,31 @@
   (fset 'yes-or-no-p 'y-or-n-p)
   (ffap-bindings)
   (windmove-default-keybindings)
+  (add-hook 'before-save-hook
+            'delete-trailing-whitespace)
+  (add-to-list 'display-buffer-alist
+               '("*Async Shell Command*"
+                 display-buffer-no-window (nil)))
+  (setq-default inhibit-startup-screen t
+                initial-scratch-message ""
+                indent-tabs-mode nil
+                tab-width 2
+                c-basic-offset 2
+                tab-always-indent 'complete
+                c-tab-always-indent 'complete
+                c-default-style "k&r"
+                cursor-type 'bar
+                disabled-command-function nil
+                scroll-step 1
+                mouse-wheel-progressive-speed nil
+                mouse-wheel-scroll-amount '(1 ((shift) . 1))
+                frame-resize-pixelwise t
+                gdb-many-windows t
+                read-file-name-completion-ignore-case t
+                read-buffer-completion-ignore-case t))
+
+(defun minimal/bindings ()
+  (interactive)
   (global-set-key (kbd "<f1>") 'save-buffer)
   (global-set-key (kbd "C-x <f1>") 'save-some-buffers)
   (global-set-key (kbd "<f5>") 'minimal/make-run)
@@ -49,39 +74,7 @@
   (global-set-key (kbd "M-o") 'other-window)
   (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
   (when (display-graphic-p)
-    (global-set-key (kbd "M-[") 'dabbrev-expand))
-  (add-hook 'before-save-hook
-            'delete-trailing-whitespace)
-  (add-to-list 'display-buffer-alist
-               '("*Async Shell Command*"
-                 display-buffer-no-window (nil)))
-  (setq-default inhibit-startup-screen t
-                initial-scratch-message ""
-                indent-tabs-mode nil
-                tab-width 2
-                c-basic-offset 2
-                tab-always-indent 'complete
-                c-tab-always-indent 'complete
-                c-default-style "k&r"
-                cursor-type 'bar
-                disabled-command-function nil
-                scroll-step 1
-                mouse-wheel-progressive-speed nil
-                mouse-wheel-scroll-amount '(1 ((shift) . 1))
-                frame-resize-pixelwise t
-                gdb-many-windows t
-                read-file-name-completion-ignore-case t
-                read-buffer-completion-ignore-case t))
-
-(defun minimal/font ()
-  (interactive)
-  (unless (boundp 'minimal/font-set)
-    (defvar minimal/font-set t)
-    (if (eq system-type 'windows-nt)
-        (set-frame-font "Consolas 9" nil t)
-      (when (member "Inconsolata" (font-family-list))
-        (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
-    (set-face-font 'fixed-pitch-serif "Courier New Bold")))
+    (global-set-key (kbd "M-[") 'dabbrev-expand)))
 
 (defun minimal/theme ()
   "Set the theme based on the hour of day."
@@ -134,7 +127,18 @@
                 "minimal.el")
               user-emacs-directory)))
 
+(defun minimal/font ()
+  (interactive)
+  (unless (boundp 'minimal/font-set)
+    (defvar minimal/font-set t)
+    (if (eq system-type 'windows-nt)
+        (set-frame-font "Consolas 9" nil t)
+      (when (member "Inconsolata" (font-family-list))
+        (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
+    (set-face-font 'fixed-pitch-serif "Courier New Bold")))
+
 (unless (boundp 'minimal/lib)
   (minimal/sane-config)
-  (minimal/font)
-  (minimal/theme))
+  (minimal/bindings)
+  (minimal/theme)
+  (minimal/font))

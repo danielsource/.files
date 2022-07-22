@@ -9,3 +9,5 @@
 	d = diff
 	l = log
 	s = status
+[color]
+	ui = auto

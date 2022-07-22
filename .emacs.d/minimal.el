@@ -9,6 +9,58 @@
             (format "make -C '%s' " (minimal/get-above-makefile t)) arguments)
            t))
 
+(defun minimal/make-run ()
+  (interactive)
+  (minimal/make "run"))
+
+(defun minimal/make-clean-all ()
+  (interactive)
+  (minimal/make "clean all"))
+
+(defun minimal/format (&optional beg end)
+  "If mark is active then sort lines, otherwise indent the buffer."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
+  (if (and transient-mark-mode mark-active)
+      (sort-lines current-prefix-arg beg end)
+    (save-excursion
+      (indent-region (point-min) (point-max) nil))))
+
+(defun minimal/other-buffer ()
+  (interactive)
+  (switch-to-buffer (other-buffer)))
+
+(defun minimal/corresponding-file ()
+  (interactive)
+  (unless buffer-file-name
+    (minimal/other-buffer)
+    (error "Buffer is not visiting a file, switching to other buffer instead"))
+  (let ((filename nil)
+        (basename (file-name-sans-extension buffer-file-name)))
+    (if (setq filename
+              (cond ((string-match "\\.c" buffer-file-name)
+                     (concat basename ".h"))
+                    ((string-match "\\.h" buffer-file-name)
+                     (concat basename ".c"))))
+        (find-file filename)
+      (minimal/other-buffer)
+      (message "Corresponding file not found, switching to other buffer instead"))))
+
+(defun minimal/corresponding-file-other-window ()
+  (interactive)
+  (unless buffer-file-name
+    (minimal/other-buffer)
+    (error "Buffer is not visiting a file, switching to other buffer instead"))
+  (find-file-other-window buffer-file-name)
+  (minimal/corresponding-file)
+  (other-window -1))
+
+(defun minimal/shell-term ()
+  (interactive)
+  (term shell-file-name)
+  (term-line-mode))
+
 (defun minimal/sane-config (&optional nomodes noindent gui)
   "It's called `sane` but still opinionated."
   (interactive)
@@ -62,11 +114,12 @@
   (global-set-key (kbd "C-x 4 <f8>") 'minimal/corresponding-file-other-window)
   (global-set-key (kbd "<f9>") 'imenu)
   (global-set-key (kbd "<f12>") 'minimal/reload)
-  (global-set-key (kbd "M--") 'kill-buffer-and-window)
   (global-set-key (kbd "C-<return>") 'switch-to-buffer)
   (global-set-key (kbd "C-x 4 C-<return>") 'switch-to-buffer-other-window)
   (global-set-key (kbd "C-x 5 C-<return>") 'switch-to-buffer-other-frame)
   (global-set-key (kbd "C-x t C-<return>") 'switch-to-buffer-other-tab)
+  (global-set-key (kbd "C-M-g") 'minimal/shell-term)
+  (global-set-key (kbd "M--") 'kill-buffer-and-window)
   (global-set-key (kbd "M-0") 'delete-window)
   (global-set-key (kbd "M-1") 'delete-other-windows)
   (global-set-key (kbd "M-2") 'split-window-below)
@@ -76,6 +129,7 @@
   (global-set-key (kbd "M-6") (lookup-key global-map (kbd "C-x 6")))
   (global-set-key (kbd "M-7") (lookup-key global-map (kbd "C-x 7")))
   (global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
+  (global-set-key (kbd "M-RET") 'minimal/other-buffer)
   (global-set-key (kbd "M-]") 'kill-this-buffer)
   (global-set-key (kbd "M-o") 'other-window)
   (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
@@ -91,41 +145,15 @@
       (load-theme 'modus-operandi)
     (load-theme 'modus-vivendi)))
 
-(defun minimal/corresponding-file ()
+(defun minimal/font ()
   (interactive)
-  (let ((filename nil)
-        (basename (file-name-sans-extension buffer-file-name)))
-    (if (setq filename
-              (cond ((string-match "\\.c" buffer-file-name)
-                     (concat basename ".h"))
-                    ((string-match "\\.h" buffer-file-name)
-                     (concat basename ".c"))))
-        (find-file filename)
-      (error "Corresponding file not found"))))
-
-(defun minimal/corresponding-file-other-window ()
-  (interactive)
-  (find-file-other-window buffer-file-name)
-  (minimal/corresponding-file)
-  (other-window -1))
-
-(defun minimal/make-run ()
-  (interactive)
-  (minimal/make "run"))
-
-(defun minimal/make-clean-all ()
-  (interactive)
-  (minimal/make "clean all"))
-
-(defun minimal/format (&optional beg end)
-  "If mark is active then sort lines, otherwise indent the buffer."
-  (interactive (if (use-region-p)
-                   (list (region-beginning) (region-end))
-                 (list nil nil)))
-  (if (and transient-mark-mode mark-active)
-      (sort-lines current-prefix-arg beg end)
-    (save-excursion
-      (indent-region (point-min) (point-max) nil))))
+  (unless (boundp 'minimal/font-set)
+    (defvar minimal/font-set t)
+    (if (eq system-type 'windows-nt)
+        (set-frame-font "Consolas 9" nil t)
+      (when (member "Inconsolata" (font-family-list))
+        (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
+    (set-face-font 'fixed-pitch-serif "Courier New Bold")))
 
 (defvar minimal/after-reload-hook nil)
 (defun minimal/reload ()
@@ -136,16 +164,6 @@
                 "minimal.el")
               user-emacs-directory))
   (run-hooks 'minimal/after-reload-hook))
-
-(defun minimal/font ()
-  (interactive)
-  (unless (boundp 'minimal/font-set)
-    (defvar minimal/font-set t)
-    (if (eq system-type 'windows-nt)
-        (set-frame-font "Consolas 9" nil t)
-      (when (member "Inconsolata" (font-family-list))
-        (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
-    (set-face-font 'fixed-pitch-serif "Courier New Bold")))
 
 (unless (boundp 'minimal/lib)
   (minimal/sane-config)

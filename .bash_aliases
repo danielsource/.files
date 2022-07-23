@@ -40,5 +40,5 @@ alias vA='v ~/.bash_aliases && . ~/.bash_aliases; true'
 
 _ls() { local IFS=' '; command ls $LS_OPTIONS ${1+"$@"} ; }
 datefmt() { date +%y-%m-%d-%H-%M-%S ; }
-fr() { cmd=$1 && shift || tree -L 1 ~/.var/app ; app="$(find ~/.var/app -maxdepth 1 -type d -iname "*$cmd*" -printf '%f\n' | grep -m1 .)" || return $? ; setsid flatpak run "$app" "$@" 2>/dev/null ; }
+fr() { cmd=$1 && shift || tree -L 1 ~/.var/app ; app="$(find ~/.var/app -maxdepth 1 -type d -iname "*$cmd*" -printf '%f\n' | grep -m1 .)" || return $? ; flatpak run "$app" "$@" ; }
 o() { setsid xdg-open "$@" >/dev/null 2>&1 ; }

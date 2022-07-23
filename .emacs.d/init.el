@@ -3,3 +3,4 @@
 (add-hook 'minimal/after-reload-hook 'minimal/theme)
 (minimal/bindings)
 (minimal/font)
+(setenv "BASH_ENV" "~/.bash_aliases")

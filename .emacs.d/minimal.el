@@ -81,6 +81,9 @@
                '("*Async Shell Command*"
                  display-buffer-no-window (nil)))
   (unless noindent
+    (add-hook 'makefile-mode-hook
+              (lambda ()
+                (setq indent-tabs-mode t)))
     (setq-default indent-tabs-mode nil
                   tab-width 2
                   c-basic-offset 2
@@ -129,9 +132,14 @@
   (global-set-key (kbd "M-6") (lookup-key global-map (kbd "C-x 6")))
   (global-set-key (kbd "M-7") (lookup-key global-map (kbd "C-x 7")))
   (global-set-key (kbd "M-8") (lookup-key global-map (kbd "C-x 8")))
+  (global-set-key (kbd "C-M-]") 'erase-buffer)
   (global-set-key (kbd "M-RET") 'minimal/other-buffer)
   (global-set-key (kbd "M-]") 'kill-this-buffer)
   (global-set-key (kbd "M-o") 'other-window)
+  (global-set-key (kbd "M-n") 'next-buffer)
+  (global-set-key (kbd "M-N") 'next-buffer)
+  (global-set-key (kbd "M-P") 'previous-buffer)
+  (global-set-key (kbd "M-p") 'previous-buffer)
   (global-set-key (kbd "M-t") (lookup-key global-map (kbd "C-x t")))
   (when (display-graphic-p)
     (global-set-key (kbd "C-z") 'undo)

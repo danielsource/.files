@@ -3,6 +3,6 @@
 (setq read-process-output-max 1000000)  ; 1 MB
 
 (defvar minimal/lib t)
-(load-file (expand-file-name "minimal.el" user-emacs-directory))
+(load (expand-file-name "minimal.el" user-emacs-directory) nil t t)
 (minimal/sane-config)
 (minimal/theme)

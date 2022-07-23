@@ -61,9 +61,28 @@
   (term shell-file-name)
   (term-line-mode))
 
+(defvar minimal/--font-height-default nil)
+(defun minimal/font-height (&optional value)
+  (interactive (list (if current-prefix-arg
+                         (prefix-numeric-value current-prefix-arg)
+                       (if minimal/--font-height-default
+                           minimal/--font-height-default
+                         (setq-default minimal/--font-height-default
+                                       (face-attribute 'default :height))))))
+  (set-face-attribute 'default nil :height value))
+
+(defvar minimal/after-reload-hook nil)
+(defun minimal/reload ()
+  (interactive)
+  (load-file (expand-file-name
+              (if (boundp 'minimal/lib)
+                  "init.el"
+                "minimal.el")
+              user-emacs-directory))
+  (run-hooks 'minimal/after-reload-hook))
+
 (defun minimal/sane-config (&optional nomodes noindent gui)
   "It's called `sane` but still opinionated."
-  (interactive)
   (unless nomodes
     (column-number-mode t)
     (electric-pair-mode t)
@@ -103,11 +122,11 @@
                 mouse-wheel-scroll-amount '(1 ((shift) . 1))
                 frame-resize-pixelwise t
                 gdb-many-windows t
+                require-final-newline t
                 read-file-name-completion-ignore-case t
                 read-buffer-completion-ignore-case t))
 
 (defun minimal/bindings ()
-  (interactive)
   (ffap-bindings)
   (windmove-default-keybindings)
   (global-set-key (kbd "<f1>") 'save-buffer)
@@ -149,13 +168,11 @@
 
 (defun minimal/theme ()
   "Set the theme based on the hour of day."
-  (interactive)
   (if (< 6 (decoded-time-hour (decode-time)) 18)
       (load-theme 'modus-operandi)
     (load-theme 'modus-vivendi)))
 
 (defun minimal/font ()
-  (interactive)
   (unless (boundp 'minimal/font-set)
     (defvar minimal/font-set t)
     (if (eq system-type 'windows-nt)
@@ -163,16 +180,6 @@
       (when (member "Inconsolata" (font-family-list))
         (set-face-attribute 'default nil :font "Inconsolata" :height 105)))
     (set-face-font 'fixed-pitch-serif "Courier New Bold")))
-
-(defvar minimal/after-reload-hook nil)
-(defun minimal/reload ()
-  (interactive)
-  (load-file (expand-file-name
-              (if (boundp 'minimal/lib)
-                  "init.el"
-                "minimal.el")
-              user-emacs-directory))
-  (run-hooks 'minimal/after-reload-hook))
 
 (unless (boundp 'minimal/lib)
   (minimal/sane-config)
